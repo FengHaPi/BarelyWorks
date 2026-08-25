@@ -1,0 +1,3 @@
+interface:
+  display_name: "Screenplay Writer"
+  short_description: "Write scripts without unapproved story changes"

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Video Quality Reviewer"
+  short_description: "Review generated shots against approved targets"
+  default_prompt: "Use $video-quality-reviewer to compare a generated shot with its approved ShotSpec and storyboard."

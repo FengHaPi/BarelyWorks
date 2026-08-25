@@ -1,0 +1,47 @@
+{
+  "name": "ai-video-studio",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Windows-local AI video production control room",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "dev": "concurrently -n API,UI -c cyan,magenta \"npm:dev:server\" \"npm:dev:ui\"",
+    "dev:server": "tsx watch src/server.ts",
+    "dev:ui": "vite --config vite.config.ts",
+    "build": "npm run build:server && npm run build:ui",
+    "build:server": "node scripts/build-server.mjs",
+    "build:ui": "vite build --config vite.config.ts",
+    "start": "node dist/server/server.js",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run --config vitest.config.ts",
+    "check": "npm run typecheck && npm run test && npm run build"
+  },
+  "dependencies": {
+    "@fastify/cors": "^11.1.0",
+    "@fastify/static": "^10.1.3",
+    "@openai/codex": "0.149.1",
+    "better-sqlite3": "^12.2.0",
+    "drizzle-orm": "^0.45.2",
+    "fastify": "^5.5.0",
+    "react": "^19.1.1",
+    "react-dom": "^19.1.1",
+    "yaml": "^2.8.1",
+    "zod": "^4.1.5"
+  },
+  "devDependencies": {
+    "@types/better-sqlite3": "^7.6.13",
+    "@types/node": "^24.3.0",
+    "@types/react": "^19.1.12",
+    "@types/react-dom": "^19.1.9",
+    "@vitejs/plugin-react": "^6.1.0",
+    "concurrently": "^9.2.1",
+    "esbuild": "^0.28.2",
+    "tsx": "^4.20.5",
+    "typescript": "^5.9.2",
+    "vite": "^8.2.2",
+    "vitest": "^4.1.11"
+  }
+}

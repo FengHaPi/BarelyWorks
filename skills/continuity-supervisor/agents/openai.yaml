@@ -1,0 +1,3 @@
+interface:
+  display_name: "Continuity Supervisor"
+  short_description: "Audit cross-shot continuity without silent edits"

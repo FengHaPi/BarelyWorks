@@ -1,0 +1,41 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["title", "version", "basedOnApprovedArtifact", "sourcePreserved", "scenes", "unresolvedQuestions"],
+  "properties": {
+    "title": { "type": "string", "minLength": 1 },
+    "version": { "type": "integer", "minimum": 1 },
+    "basedOnApprovedArtifact": { "type": "string", "minLength": 1 },
+    "sourcePreserved": { "type": "boolean" },
+    "scenes": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["sequence", "heading", "location", "timeOfDay", "action", "dialogue"],
+        "properties": {
+          "sequence": { "type": "integer", "minimum": 1 },
+          "heading": { "type": "string", "minLength": 1 },
+          "location": { "type": "string", "minLength": 1 },
+          "timeOfDay": { "type": "string", "minLength": 1 },
+          "action": { "type": "array", "minItems": 1, "items": { "type": "string", "minLength": 1 } },
+          "dialogue": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["speaker", "text"],
+              "properties": {
+                "speaker": { "type": "string", "minLength": 1 },
+                "text": { "type": "string", "minLength": 1 }
+              }
+            }
+          }
+        }
+      }
+    },
+    "unresolvedQuestions": { "type": "array", "items": { "type": "string" } }
+  }
+}

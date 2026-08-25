@@ -1,0 +1,9 @@
+node_modules/
+dist/
+data/*.sqlite*
+projects/*
+!projects/.gitkeep
+*.log
+.env
+.DS_Store
+Thumbs.db

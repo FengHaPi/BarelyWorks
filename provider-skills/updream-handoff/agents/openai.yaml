@@ -1,0 +1,4 @@
+interface:
+  display_name: "Updream Handoff"
+  short_description: "Build manual Updream upload packages safely"
+  default_prompt: "Use $updream-handoff to compile approved shots and assets into a manual Updream handoff package."

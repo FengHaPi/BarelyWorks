@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["mode", "prompt", "referenceLabels", "notes"],
+  "properties": {
+    "mode": { "type": "string", "enum": ["T2VA", "I2VA", "FL2VA", "L2VA", "Ref2VA"] },
+    "prompt": { "type": "string", "minLength": 20 },
+    "referenceLabels": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["assetId", "label", "kind", "filePath", "role"],
+        "properties": {
+          "assetId": { "type": "string" },
+          "label": { "type": "string" },
+          "kind": { "type": "string", "enum": ["image", "video", "audio"] },
+          "filePath": { "type": "string" },
+          "role": { "type": "string" }
+        }
+      }
+    },
+    "notes": { "type": "array", "items": { "type": "string" } }
+  }
+}

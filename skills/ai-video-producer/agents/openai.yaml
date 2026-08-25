@@ -1,0 +1,3 @@
+interface:
+  display_name: "AI Video Producer"
+  short_description: "Route projects through guarded production stages"

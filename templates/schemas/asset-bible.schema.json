@@ -1,0 +1,47 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["assets", "conflicts"],
+  "properties": {
+    "assets": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "type", "name", "identity", "appearance", "designBasis", "productionReady", "designSummary", "distinctiveFeatures", "negativeConstraints", "continuityRules", "usage", "sourceEvidence", "unknowns"],
+        "properties": {
+          "id": { "type": "string", "pattern": "^(CHAR|SCENE|PROP|COSTUME|STYLE|AUDIO|REF)-[0-9]{3}$" },
+          "type": { "type": "string", "enum": ["character", "scene", "prop", "costume", "style", "audio", "reference"] },
+          "name": { "type": "string", "minLength": 1 },
+          "identity": { "type": "string", "minLength": 1 },
+          "appearance": { "type": "string", "minLength": 1 },
+          "designBasis": { "type": "string", "enum": ["source-grounded", "creative-proposal", "reference-guided"] },
+          "productionReady": { "type": "boolean" },
+          "designSummary": { "type": "string" },
+          "distinctiveFeatures": { "type": "array", "items": { "type": "string" } },
+          "negativeConstraints": { "type": "array", "items": { "type": "string" } },
+          "continuityRules": { "type": "array", "items": { "type": "string" } },
+          "usage": { "type": "array", "items": { "type": "string" } },
+          "sourceEvidence": { "type": "array", "items": { "type": "string" } },
+          "unknowns": { "type": "array", "items": { "type": "string" } }
+        }
+      }
+    },
+    "conflicts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["severity", "code", "message", "affectedIds"],
+        "properties": {
+          "severity": { "type": "string", "enum": ["info", "warning", "error"] },
+          "code": { "type": "string", "minLength": 1 },
+          "message": { "type": "string", "minLength": 1 },
+          "affectedIds": { "type": "array", "items": { "type": "string" } }
+        }
+      }
+    }
+  }
+}

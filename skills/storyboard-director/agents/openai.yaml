@@ -1,0 +1,3 @@
+interface:
+  display_name: "Storyboard Director"
+  short_description: "Design observable keyframes and motion plans"

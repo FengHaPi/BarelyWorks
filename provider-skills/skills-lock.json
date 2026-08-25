@@ -1,0 +1,16 @@
+{
+  "schemaVersion": 1,
+  "skills": {
+    "h3-prompt-writing": {
+      "source": "https://github.com/MiniMax-AI/MiniMax-H3",
+      "path": "skills/h3-prompt-writing",
+      "ref": "main",
+      "commit": "d21241f0a4b3acbb34c97dae47fa417b7065e438",
+      "installedAt": "2026-08-25T03:29:27.568Z"
+    },
+    "updream-handoff": {
+      "source": "local",
+      "version": "0.1.0"
+    }
+  }
+}

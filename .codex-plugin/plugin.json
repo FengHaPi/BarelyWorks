@@ -1,0 +1,18 @@
+{
+  "name": "ai-video-studio",
+  "version": "0.1.0",
+  "description": "Local-first AI video production workflow with guarded stages and structured artifacts",
+  "author": {
+    "name": "Local developer"
+  },
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "AI Video Studio",
+    "shortDescription": "Run guarded local AI video production workflows.",
+    "longDescription": "AI Video Studio routes stories, scripts, assets, shots, storyboards, handoffs, reviews, and delivery through a local-first versioned workflow.",
+    "developerName": "Local developer",
+    "category": "Productivity",
+    "capabilities": ["Interactive", "Write"],
+    "defaultPrompt": "Inspect my local AI Video Studio project and route it to the next valid stage."
+  }
+}

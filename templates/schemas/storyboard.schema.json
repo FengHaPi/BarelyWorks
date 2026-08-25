@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["shots", "globalContinuityNotes"],
+  "properties": {
+    "shots": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["shotId", "startFrame", "endFrame", "composition", "motionPlan", "characterIds", "sceneId", "requiredAssetIds", "continuityRisks", "approved"],
+        "properties": {
+          "shotId": { "type": "string", "pattern": "^S[0-9]{3}$" },
+          "startFrame": { "type": "string", "minLength": 1 },
+          "endFrame": { "type": "string", "minLength": 1 },
+          "composition": { "type": "string", "minLength": 1 },
+          "motionPlan": { "type": "string", "minLength": 1 },
+          "characterIds": { "type": "array", "items": { "type": "string" } },
+          "sceneId": { "type": "string", "minLength": 1 },
+          "requiredAssetIds": { "type": "array", "items": { "type": "string" } },
+          "continuityRisks": { "type": "array", "items": { "type": "string" } },
+          "approved": { "type": "boolean" }
+        }
+      }
+    },
+    "globalContinuityNotes": { "type": "array", "items": { "type": "string" } }
+  }
+}

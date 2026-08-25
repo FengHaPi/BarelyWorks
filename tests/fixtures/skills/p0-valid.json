@@ -1,0 +1,125 @@
+{
+  "ai-video-producer": {
+    "currentStage": "SOURCE_IMPORTED",
+    "nextAction": "生成剧情诊断和大纲草案",
+    "requiredSkill": "story-architect",
+    "blockers": [],
+    "approvalRequired": false,
+    "unverifiedClaims": ["H3 真实视觉效果尚未验证"]
+  },
+  "project-intake": {
+    "sourceType": "story",
+    "detectedStage": "SOURCE_IMPORTED",
+    "confidence": 0.98,
+    "constraints": {
+      "targetDurationSec": 45,
+      "aspectRatio": "16:9",
+      "resolution": "1920x1080",
+      "videoType": "叙事短片",
+      "visualStyle": "冷灰电影感",
+      "releasePlatform": null,
+      "targetAudience": null,
+      "allowStorySuggestions": true
+    },
+    "preservedFacts": ["故事发生在雨夜客栈"],
+    "missingInformation": [],
+    "warnings": []
+  },
+  "story-architect": {
+    "title": "雨夜来客",
+    "logline": "一名旅人在封闭客栈中发现追踪自己的陌生人。",
+    "themes": ["信任"],
+    "targetDurationSec": 45,
+    "structure": [{
+      "sequence": 1,
+      "heading": "进入客栈",
+      "purpose": "建立危险",
+      "events": ["旅人推门", "陌生人抬眼"],
+      "estimatedDurationSec": 45
+    }],
+    "lockedFacts": ["结局不改变"],
+    "proposedChanges": [],
+    "approvalNotes": ["批准后才进入剧本"]
+  },
+  "screenplay-writer": {
+    "title": "雨夜来客",
+    "version": 1,
+    "basedOnApprovedArtifact": "outline-v001:sha256-example",
+    "sourcePreserved": true,
+    "scenes": [{
+      "sequence": 1,
+      "heading": "内景 客栈 夜",
+      "location": "客栈",
+      "timeOfDay": "夜",
+      "action": ["门被风推开，旅人走入。"],
+      "dialogue": [{"speaker": "旅人", "text": "还有房吗？"}]
+    }],
+    "unresolvedQuestions": []
+  },
+  "asset-bible-builder": {
+    "assets": [{
+      "id": "CHAR-001",
+      "type": "character",
+      "name": "旅人",
+      "identity": "独自赶路的年轻旅人",
+      "appearance": "年轻旅人身穿深棕防雨斗篷，肩部被雨水浸深，短发贴额，腰间挂旧皮水囊，行走时始终谨慎观察四周。",
+      "designBasis": "creative-proposal",
+      "productionReady": true,
+      "designSummary": "深棕湿斗篷包裹的谨慎年轻旅人，以贴额短发、旧皮水囊和湿润肩线固定身份。",
+      "distinctiveFeatures": ["深棕湿斗篷", "贴额短发", "旧皮水囊"],
+      "negativeConstraints": ["不得改为鲜艳服装", "斗篷肩部必须保持湿润"],
+      "continuityRules": ["斗篷始终湿润"],
+      "usage": ["S001"],
+      "sourceEvidence": ["剧本第一场动作"],
+      "unknowns": []
+    }],
+    "conflicts": []
+  },
+  "shooting-script-director": {
+    "targetDurationSec": 45,
+    "shots": [{
+      "id": "S001",
+      "projectId": "019c9a68-6d6e-7cf1-b9cc-0caa79d9887a",
+      "sequence": 1,
+      "startTimeSec": 0,
+      "endTimeSec": 45,
+      "durationSec": 45,
+      "purpose": "建立人物与危险",
+      "characterIds": ["CHAR-001"],
+      "sceneId": "SCENE-001",
+      "propIds": [],
+      "styleIds": ["STYLE-001"],
+      "shotSize": "全景至中景",
+      "camera": {"position": "门内平视", "movement": "缓慢推进", "lens": "35mm", "composition": "人物位于左三分之一"},
+      "action": "旅人推门进入并停下观察",
+      "dialogue": [{"speakerId": "CHAR-001", "text": "还有房吗？", "language": "zh-CN"}],
+      "sound": ["雨声", "木门声"],
+      "startState": "客栈空镜，门关闭",
+      "endState": "旅人站在门内，面向柜台",
+      "preferredProvider": null,
+      "status": "draft"
+    }],
+    "validationNotes": []
+  },
+  "storyboard-director": {
+    "shots": [{
+      "shotId": "S001",
+      "startFrame": "门关闭，客栈内部昏暗",
+      "endFrame": "旅人站在门内左三分之一",
+      "composition": "柜台形成右侧视觉重量",
+      "motionPlan": "镜头从全景缓慢推进至中景",
+      "characterIds": ["CHAR-001"],
+      "sceneId": "SCENE-001",
+      "requiredAssetIds": ["CHAR-001", "SCENE-001", "STYLE-001"],
+      "continuityRisks": ["斗篷湿度"],
+      "approved": false
+    }],
+    "globalContinuityNotes": ["保持冷灰夜景"]
+  },
+  "continuity-supervisor": {
+    "checkedShotIds": ["S001"],
+    "issues": [],
+    "passed": true,
+    "uncheckedClaims": ["尚无生成视频，无法检查身份视觉一致性"]
+  }
+}
