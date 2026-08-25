@@ -11,6 +11,7 @@ import type { TextIntelligenceProvider } from "./ai/text-provider";
 import { ProjectService } from "./projects/project-service";
 import { QualityService } from "./projects/quality-service";
 import type { MediaToolchain } from "./media/media-toolchain";
+import { generationResolutionSchema } from "./shared/handoff-schemas";
 import {
   artifactTypeSchema,
   createArtifactVersionInputSchema,
@@ -69,6 +70,16 @@ function sendLocalVideo(reply: FastifyReply, filePath: string, fileName: string,
     .send(createReadStream(filePath, { start, end }));
 }
 
+function sendLocalDownload(reply: FastifyReply, filePath: string, fileName: string, contentType: string) {
+  const size = fs.statSync(filePath).size;
+  const encodedFileName = encodeURIComponent(fileName);
+  return reply
+    .type(contentType)
+    .header("Content-Length", size)
+    .header("Content-Disposition", `attachment; filename*=UTF-8''${encodedFileName}`)
+    .send(createReadStream(filePath));
+}
+
 export async function createApp(options: CreateAppOptions = {}): Promise<FastifyInstance> {
   const runtimeRoot = options.runtimeRoot ?? process.env.AI_VIDEO_STUDIO_RUNTIME_ROOT ?? process.cwd();
   const studio = createStudioDatabase(runtimeRoot);
@@ -102,7 +113,7 @@ export async function createApp(options: CreateAppOptions = {}): Promise<Fastify
       });
     }
     const message = error instanceof Error ? error.message : "未知请求错误";
-    const statusCode = message === "项目不存在" ? 404 : 400;
+    const statusCode = message === "项目不存在" || message === "归档项目不存在" ? 404 : 400;
     return reply.status(statusCode).send({ error: "REQUEST_FAILED", message });
   });
 
@@ -118,7 +129,7 @@ export async function createApp(options: CreateAppOptions = {}): Promise<Fastify
     return {
       ok: true,
       service: "ai-video-studio",
-      version: "0.1.0",
+      version: "0.1.1",
       bind: "127.0.0.1",
       paidVideoApiEnabled: false,
       skillDrivenTextGeneration: textSkills.length > 0 && !skillLoadError,
@@ -129,6 +140,8 @@ export async function createApp(options: CreateAppOptions = {}): Promise<Fastify
   });
 
   app.get("/api/projects", async () => ({ projects: await projectService.list() }));
+
+  app.get("/api/projects/archived", async () => ({ projects: await projectService.listArchived() }));
 
   app.post("/api/projects", async (request, reply) => {
     const input = createProjectInputSchema.parse(request.body);
@@ -141,6 +154,15 @@ export async function createApp(options: CreateAppOptions = {}): Promise<Fastify
     if (!project) return reply.status(404).send({ error: "NOT_FOUND", message: "项目不存在" });
     return { project };
   });
+
+  app.delete<{ Params: { id: string } }>("/api/projects/:id", async (request) => ({
+    project: await projectService.archive(request.params.id),
+    recoverable: true,
+  }));
+
+  app.post<{ Params: { id: string } }>("/api/projects/:id/restore", async (request) => ({
+    project: await projectService.restore(request.params.id),
+  }));
 
   app.get<{ Params: { id: string } }>("/api/projects/:id/source", async (request) => projectService.readSource(request.params.id));
 
@@ -247,8 +269,9 @@ export async function createApp(options: CreateAppOptions = {}): Promise<Fastify
   app.post<{ Params: { id: string } }>("/api/projects/:id/handoff/updream/bootstrap", async (request, reply) => {
     return reply.status(201).send(await projectService.createUpdreamBootstrap(request.params.id));
   });
-  app.post<{ Params: { id: string; shotId: string } }>("/api/projects/:id/handoff/updream/shots/:shotId/package", async (request, reply) => {
-    return reply.status(201).send(await projectService.createUpdreamShotPackage(request.params.id, request.params.shotId));
+  app.post<{ Params: { id: string; shotId: string }; Body: unknown }>("/api/projects/:id/handoff/updream/shots/:shotId/package", async (request, reply) => {
+    const body = z.object({ generationResolution: generationResolutionSchema.default("platform-default") }).parse(request.body ?? {});
+    return reply.status(201).send(await projectService.createUpdreamShotPackage(request.params.id, request.params.shotId, body.generationResolution));
   });
   app.get<{ Params: { id: string; shotId: string; version: string } }>("/api/projects/:id/handoff/updream/shots/:shotId/packages/:version/prompt", async (request) => {
     const version = z.coerce.number().int().positive().parse(request.params.version);
@@ -274,6 +297,11 @@ export async function createApp(options: CreateAppOptions = {}): Promise<Fastify
     const media = await qualityService.readGenerationMedia(request.params.id, request.params.jobId);
     return sendLocalVideo(reply, media.filePath, media.fileName, request.headers.range);
   });
+  app.get<{ Params: { id: string; jobId: string; index: string } }>("/api/projects/:id/generations/:jobId/review-frames/:index", async (request, reply) => {
+    const index = z.coerce.number().int().nonnegative().parse(request.params.index);
+    const frame = await qualityService.readGenerationReviewFrame(request.params.id, request.params.jobId, index);
+    return reply.type(imageMime(frame.filePath)).header("Content-Disposition", `inline; filename=\"${frame.fileName}\"`).send(createReadStream(frame.filePath));
+  });
   app.post<{ Params: { id: string; jobId: string }; Body: unknown }>("/api/projects/:id/generations/:jobId/reviews", async (request, reply) => {
     return reply.status(201).send(await qualityService.recordQualityReview(request.params.id, request.params.jobId, request.body as never));
   });
@@ -283,6 +311,12 @@ export async function createApp(options: CreateAppOptions = {}): Promise<Fastify
   app.get<{ Params: { id: string; renderId: string } }>("/api/projects/:id/renders/:renderId/media", async (request, reply) => {
     const media = await qualityService.readRenderMedia(request.params.id, request.params.renderId);
     return sendLocalVideo(reply, media.filePath, media.fileName, request.headers.range);
+  });
+  app.get<{ Params: { id: string; renderId: string; kind: string } }>("/api/projects/:id/renders/:renderId/files/:kind", async (request, reply) => {
+    const kind = z.enum(["video", "subtitle", "report"]).parse(request.params.kind);
+    const file = await qualityService.readRenderFile(request.params.id, request.params.renderId, kind);
+    const contentType = kind === "video" ? mediaMime(file.filePath) : kind === "subtitle" ? "application/x-subrip; charset=utf-8" : "text/markdown; charset=utf-8";
+    return sendLocalDownload(reply, file.filePath, file.fileName, contentType);
   });
   app.post<{ Params: { id: string; renderId: string }; Body: unknown }>("/api/projects/:id/renders/:renderId/decision", async (request) => {
     const body = z.object({ decision: z.enum(["approved", "rejected"]), comment: z.string().max(2_000).optional() }).parse(request.body);

@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState, type FormEvent, type ReactNode } from "react";
 import { api } from "./api";
-import { reviewDimensions, type Artifact, type ArtifactType, type Asset, type AssetDesignMode, type CreateProjectInput, type GenerationCenter, type Health, type Project, type ProjectStage, type QualityCenter, type QualityDecision, type QualityReviewInput, type ReviewDimensionStatus, type ShotSpec, type SkillProvenance, type SourceType } from "./types";
+import { reviewDimensions, type Artifact, type ArtifactType, type Asset, type AssetDesignMode, type CreateProjectInput, type GenerationCenter, type GenerationResolution, type Health, type MediaToolStatus, type Project, type ProjectStage, type QualityCenter, type QualityDecision, type QualityReviewInput, type ReviewDimensionStatus, type ShotSpec, type SkillProvenance, type SourceType } from "./types";
 
 const stageGroups = [
   { label: "输入内容", stages: ["SOURCE_IMPORTED"] },
@@ -58,6 +58,20 @@ const emptyForm: CreateProjectInput = {
   allowStorySuggestions: true,
 };
 
+const outputResolutionOptions: Record<string, string[]> = {
+  "16:9": ["1920x1080", "1280x720", "854x480"],
+  "9:16": ["1080x1920", "720x1280", "480x854"],
+  "1:1": ["1080x1080", "720x720", "480x480"],
+};
+
+const generationResolutionOptions: Array<{ value: GenerationResolution; label: string }> = [
+  { value: "platform-default", label: "平台默认" },
+  { value: "480p", label: "480p" },
+  { value: "720p", label: "720p" },
+  { value: "768p", label: "768p" },
+  { value: "1080p", label: "1080p" },
+];
+
 function Icon({ children }: { children: ReactNode }) {
   return <span className="icon" aria-hidden="true">{children}</span>;
 }
@@ -67,6 +81,10 @@ export function App() {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [health, setHealth] = useState<Health | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
+  const [archiveCandidate, setArchiveCandidate] = useState<Project | null>(null);
+  const [archiveManagerOpen, setArchiveManagerOpen] = useState(false);
+  const [archivedProjects, setArchivedProjects] = useState<Project[]>([]);
+  const [archiveLoading, setArchiveLoading] = useState(false);
   const [view, setView] = useState<"dashboard" | "stage" | "assets" | "generation" | "quality" | "delivery">("dashboard");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -99,6 +117,38 @@ export function App() {
     setProjects((current) => current.map((item) => item.id === project.id ? project : item));
   }
 
+  async function handleArchive(projectId: string) {
+    const { project } = await api.archiveProject(projectId);
+    const remaining = projects.filter((item) => item.id !== projectId);
+    setProjects(remaining);
+    setArchivedProjects((current) => [project, ...current.filter((item) => item.id !== projectId)]);
+    setSelectedId(remaining[0]?.id ?? null);
+    setArchiveCandidate(null);
+    setView("dashboard");
+  }
+
+  async function openArchiveManager() {
+    setArchiveManagerOpen(true);
+    setArchiveLoading(true);
+    try {
+      const result = await api.listArchivedProjects();
+      setArchivedProjects(result.projects);
+    } catch (reason) {
+      setError(reason instanceof Error ? reason.message : "读取归档项目失败");
+    } finally {
+      setArchiveLoading(false);
+    }
+  }
+
+  async function handleRestore(projectId: string) {
+    const { project } = await api.restoreProject(projectId);
+    setArchivedProjects((current) => current.filter((item) => item.id !== projectId));
+    setProjects((current) => [project, ...current.filter((item) => item.id !== projectId)]);
+    setSelectedId(project.id);
+    setArchiveManagerOpen(false);
+    setView("dashboard");
+  }
+
   return (
     <div className="app-shell">
       <header className="topbar">
@@ -119,6 +169,7 @@ export function App() {
           <span className={`local-state ${health?.ok ? "online" : "offline"}`}>
             <i />{health?.ok ? "本地服务在线" : "正在连接"}
           </span>
+          <button className="secondary compact" onClick={() => void openArchiveManager()}>已归档</button>
           <button className="primary compact" onClick={() => setModalOpen(true)}>＋ 新建项目</button>
         </div>
       </header>
@@ -167,7 +218,7 @@ export function App() {
           ) : selected && view === "delivery" ? (
             <DeliveryWorkspace project={selected} onBack={() => setView("dashboard")} onProjectUpdate={updateProject} onError={setError} />
           ) : selected ? (
-            <ProjectDashboard project={selected} projects={projects} onSelect={(id) => { setSelectedId(id); setView("dashboard"); }} onCreate={() => setModalOpen(true)} onOpenStage={() => setView("stage")} onOpenGeneration={() => setView("generation")} />
+            <ProjectDashboard project={selected} projects={projects} onSelect={(id) => { setSelectedId(id); setView("dashboard"); }} onCreate={() => setModalOpen(true)} onArchive={() => setArchiveCandidate(selected)} onOpenStage={() => setView("stage")} onOpenGeneration={() => setView("generation")} />
           ) : (
             <EmptyStudio onCreate={() => setModalOpen(true)} />
           )}
@@ -180,6 +231,8 @@ export function App() {
       </div>
 
       {modalOpen && <CreateProjectModal onClose={() => setModalOpen(false)} onCreate={handleCreate} />}
+      {archiveCandidate && <ArchiveProjectModal project={archiveCandidate} onClose={() => setArchiveCandidate(null)} onArchive={handleArchive} />}
+      {archiveManagerOpen && <ArchivedProjectsModal projects={archivedProjects} loading={archiveLoading} onClose={() => setArchiveManagerOpen(false)} onRestore={handleRestore} />}
     </div>
   );
 }
@@ -203,11 +256,12 @@ function EmptyStudio({ onCreate }: { onCreate: () => void }) {
   );
 }
 
-function ProjectDashboard({ project, projects, onSelect, onCreate, onOpenStage, onOpenGeneration }: {
+function ProjectDashboard({ project, projects, onSelect, onCreate, onArchive, onOpenStage, onOpenGeneration }: {
   project: Project;
   projects: Project[];
   onSelect: (id: string) => void;
   onCreate: () => void;
+  onArchive: () => void;
   onOpenStage: () => void;
   onOpenGeneration: () => void;
 }) {
@@ -260,6 +314,7 @@ function ProjectDashboard({ project, projects, onSelect, onCreate, onOpenStage, 
             {projects.map((item) => <option key={item.id} value={item.id}>{item.title}</option>)}
           </select>
           <button className="secondary" onClick={onCreate}>新项目</button>
+          <button className="secondary danger" onClick={onArchive}>删除项目</button>
         </div>
       </div>
 
@@ -327,6 +382,15 @@ function formatElapsed(totalSeconds: number): string {
   const minutes = Math.floor(totalSeconds / 60);
   const seconds = totalSeconds % 60;
   return minutes ? `${minutes} 分 ${String(seconds).padStart(2, "0")} 秒` : `${seconds} 秒`;
+}
+
+function missingRoughCutCapabilities(status: MediaToolStatus): string[] {
+  return [
+    !status.ffmpegAvailable ? "FFmpeg" : null,
+    !status.ffprobeAvailable ? "ffprobe" : null,
+    status.ffmpegAvailable && !status.libx264Available ? "libx264" : null,
+    status.ffmpegAvailable && !status.aacAvailable ? "AAC" : null,
+  ].filter((item): item is string => Boolean(item));
 }
 
 const assetDesignModeLabels: Record<AssetDesignMode, { title: string; detail: string }> = {
@@ -401,6 +465,7 @@ function GenerationCenterWorkspace({ project, onBack, onProjectUpdate, onError }
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
+  const [generationResolutionByShot, setGenerationResolutionByShot] = useState<Record<string, GenerationResolution>>({});
 
   async function load() {
     const [generationResult, qualityResult] = await Promise.all([api.generationCenter(project.id), api.qualityCenter(project.id)]);
@@ -430,8 +495,9 @@ function GenerationCenterWorkspace({ project, onBack, onProjectUpdate, onError }
   }
 
   async function createShotPackage(shotId: string) {
-    if (!window.confirm(`即将把 ${shotId} 的已批准内容发送给本地 Codex，使用官方 H3 Skill 生成提示词。不会调用付费视频 API，也不会自动上传。是否继续？`)) return;
-    await run(`shot:${shotId}`, () => api.createUpdreamShotPackage(project.id, shotId), `${shotId} 的 H3 / Updream 新版本包已创建。`);
+    const generationResolution = generationResolutionByShot[shotId] ?? "platform-default";
+    if (!window.confirm(`即将把 ${shotId} 的已批准内容发送给本地 Codex，使用官方 H3 Skill 生成提示词。本次生成清晰度记录为 ${generationResolution}，它不会写入提示词；请在 Updream 生产页选择。是否继续？`)) return;
+    await run(`shot:${shotId}`, () => api.createUpdreamShotPackage(project.id, shotId, generationResolution), `${shotId} 的 H3 / Updream 新版本包已创建，生成清晰度：${generationResolution}。`);
   }
 
   async function copyPrompt(shotId: string, version: number) {
@@ -479,7 +545,7 @@ function GenerationCenterWorkspace({ project, onBack, onProjectUpdate, onError }
       {notice && <div className="success-notice">✓ {notice}</div>}
       {!generationReady && <div className="generation-lock"><b>当前尚未到达生成阶段</b><p>先完成并批准资产定义、ShotSpec 与分镜。生成中心可以查看能力，但不会越过审批门禁。</p></div>}
       <div className="provider-capability-card">
-        <div><span>H3 CAPABILITY / VERIFIED {new Date(center.capabilities.verifiedAt).toLocaleDateString("zh-CN")}</span><strong>{center.capabilities.model}</strong><p>{center.capabilities.durationMinSec}–{center.capabilities.durationMaxSec} 秒 · {center.capabilities.aspectRatios.join(" / ")} · 默认短边 {center.capabilities.defaultShortSide}px</p></div>
+        <div><span>H3 CAPABILITY / VERIFIED {new Date(center.capabilities.verifiedAt).toLocaleDateString("zh-CN")}</span><strong>{center.capabilities.model}</strong><p>{center.capabilities.durationMinSec}–{center.capabilities.durationMaxSec} 秒 · {center.capabilities.aspectRatios.join(" / ")} · 资料默认短边 {center.capabilities.defaultShortSide}px（非最低限制）</p></div>
         <div className="provider-skills">{center.skills.map((skill) => <code key={skill.name}>{skill.name}<small>{skill.version} · {skill.sha256.slice(0, 10)}…</small></code>)}</div>
       </div>
       <div className="handoff-step-grid">
@@ -500,7 +566,18 @@ function GenerationCenterWorkspace({ project, onBack, onProjectUpdate, onError }
           <button className="primary" disabled={!(["READY_FOR_GENERATION", "GENERATING", "GENERATION_REVIEW"] as ProjectStage[]).includes(project.currentStage) || !qualityCenter.mediaTools.ffprobeAvailable || Boolean(busy)} onClick={() => void scanInbox()}>{busy === "scan" ? "正在校验…" : "立即扫描收件箱"}</button>
         </div>
       </article>
-      {!qualityCenter.mediaTools.ffprobeAvailable && <div className="generation-lock"><b>当前机器未检测到 ffprobe</b><p>导入按钮已真实拦截。安装 FFmpeg，或配置 AI_VIDEO_STUDIO_FFPROBE_PATH 后再扫描；系统不会把未验证文件标成成功。</p></div>}
+      <article className={`media-preflight-card ${qualityCenter.mediaTools.roughCutReady ? "ready" : "blocked"}`}>
+        <header><div><span>MEDIA PREFLIGHT</span><strong>{qualityCenter.mediaTools.roughCutReady ? "粗剪工具链已就绪" : "粗剪工具链未就绪"}</strong></div><b>{qualityCenter.mediaTools.roughCutReady ? "READY" : `缺少 ${missingRoughCutCapabilities(qualityCenter.mediaTools).join(" / ")}`}</b></header>
+        <div className="media-capability-grid">
+          <span className={qualityCenter.mediaTools.ffmpegAvailable ? "ok" : "missing"}>FFmpeg</span>
+          <span className={qualityCenter.mediaTools.ffprobeAvailable ? "ok" : "missing"}>ffprobe</span>
+          <span className={qualityCenter.mediaTools.libx264Available ? "ok" : "missing"}>libx264</span>
+          <span className={qualityCenter.mediaTools.aacAvailable ? "ok" : "missing"}>AAC</span>
+        </div>
+        <p>环境变量优先；否则自动发现项目便携目录。程序只报告真实探测结果，不会自动安装或伪造可用状态。</p>
+        <div className="media-setup-path"><code>{qualityCenter.mediaTools.setupDirectory}</code><button className="secondary" onClick={() => void navigator.clipboard.writeText(qualityCenter.mediaTools.setupDirectory)}>复制便携目录</button></div>
+      </article>
+      {!qualityCenter.mediaTools.ffprobeAvailable && <div className="generation-lock"><b>当前机器未检测到 ffprobe</b><p>导入按钮已真实拦截。可把 ffmpeg 与 ffprobe 放入上方便携目录，或配置 AI_VIDEO_STUDIO_FFPROBE_PATH 后重启；系统不会把未验证文件标成成功。</p></div>}
       {qualityCenter.generations.length > 0 && <div className="generation-version-strip">{qualityCenter.generations.map((generation) => <span key={generation.id}><code>{generation.shotId} V{String(generation.generationVersion).padStart(3, "0")}</code><b>{generation.status}</b><small>{generation.media.width}×{generation.media.height} · {generation.media.durationSec.toFixed(2)}s</small></span>)}</div>}
       <div className="generation-columns">
         <article className="generation-panel asset-upload-panel">
@@ -519,8 +596,9 @@ function GenerationCenterWorkspace({ project, onBack, onProjectUpdate, onError }
               <div className="generation-shot-head"><div><code>{shot.id}</code><strong>{shot.purpose}</strong><small>{shot.durationSec}s · {preflight.mode} · {preflight.references.length} 个本地引用</small></div><b>{preflight.passed ? "PREFLIGHT OK" : "BLOCKED"}</b></div>
               {preflight.errors.map((error) => <p className="preflight-error" key={error}>{error}</p>)}
               {preflight.warnings.slice(0, 2).map((warning) => <p className="preflight-warning" key={warning}>{warning}</p>)}
+              <label className="package-generation-setting"><span>本次生产清晰度</span><select disabled={Boolean(busy)} value={generationResolutionByShot[shot.id] ?? "platform-default"} onChange={(event) => setGenerationResolutionByShot((current) => ({ ...current, [shot.id]: event.target.value as GenerationResolution }))}>{generationResolutionOptions.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}</select><small>只写入投递清单，不进入 H3 提示词；最终在 Updream 生产页选择。</small></label>
               <div className="package-actions"><button className="primary" disabled={!(["READY_FOR_GENERATION", "GENERATING"] as ProjectStage[]).includes(project.currentStage) || !preflight.passed || Boolean(busy)} onClick={() => void createShotPackage(shot.id)}>{busy === `shot:${shot.id}` ? "H3 Skill 正在编译…" : latest ? "生成新版本" : "生成 H3 投递包"}</button>{latest && <><button className="secondary" disabled={Boolean(busy)} onClick={() => void copyPrompt(shot.id, latest.version)}>复制 V{String(latest.version).padStart(3, "0")} 提示词</button><button className={latest.uploadState === "uploaded" ? "package-uploaded" : "secondary"} disabled={Boolean(busy)} onClick={() => void run(`package:${shot.id}`, () => api.setPackageUploadState(project.id, shot.id, latest.version, latest.uploadState === "uploaded" ? "not-uploaded" : "uploaded"), `${shot.id} V${String(latest.version).padStart(3, "0")} 投递状态已更新。`)}>{latest.uploadState === "uploaded" ? "✓ 已人工投递" : "标记已投递"}</button></>}</div>
-              {latest && <code className="package-path" title={latest.path}>{latest.path}</code>}
+              {latest && <code className="package-path" title={latest.path}>V{String(latest.version).padStart(3, "0")} · {latest.generationResolution} · {latest.path}</code>}
             </section>;
           })}
         </article>
@@ -602,6 +680,7 @@ function QualityReviewWorkspace({ project, onBack, onProjectUpdate, onError }: {
   const reviewHistory = center?.reviews.filter((item) => item.jobId === selectedJobId) ?? [];
   const canRender = Boolean(center?.shots.length) && Boolean(center?.shots.every((item) =>
     center.generations.some((generationItem) => generationItem.shotId === item.id && generationItem.status === "accepted")));
+  const mediaMissing = center ? missingRoughCutCapabilities(center.mediaTools) : [];
 
   function updateDimension(index: number, field: "status" | "note" | "evidence", value: string) {
     setForm((current) => ({
@@ -691,6 +770,12 @@ function QualityReviewWorkspace({ project, onBack, onProjectUpdate, onError }: {
             <article className="quality-player">
               <header><span>ACTUAL VIDEO</span><strong>{generation?.sourceFileName}</strong></header>
               {generation && <video key={generation.id} controls preload="metadata" src={api.generationMediaUrl(project.id, generation.id)} />}
+              {generation && generation.reviewFramePaths.length > 0 && <div className="review-frame-grid">
+                {generation.reviewFramePaths.map((_framePath, index) => <figure key={`${generation.id}-${index}`}>
+                  <img src={api.generationReviewFrameUrl(project.id, generation.id, index)} alt={`${generation.shotId} ${["起始", "中段", "结束"][index] ?? `关键帧 ${index + 1}`}`} loading="lazy" />
+                  <figcaption>{["起始状态", "中段动作", "结束状态"][index] ?? `关键帧 ${index + 1}`}</figcaption>
+                </figure>)}
+              </div>}
               <p>导入哈希：<code>{generation?.sourceHash}</code></p>
             </article>
           </div>
@@ -715,9 +800,9 @@ function QualityReviewWorkspace({ project, onBack, onProjectUpdate, onError }: {
             </div>
             <div className="quality-actions">
               <button className="primary" disabled={generation?.status !== "review" || Boolean(busy)} onClick={() => void submitReview()}>{busy === "review" ? "正在保存不可变记录…" : generation?.status === "review" ? "保存人工质检结论" : "该版本已完成质检"}</button>
-              <button className="secondary" disabled={!canRender || !center.mediaTools.ffmpegAvailable || !center.mediaTools.ffprobeAvailable || Boolean(busy) || !(project.currentStage === "GENERATION_REVIEW" || project.currentStage === "EDITING")} onClick={() => void renderRoughCut()}>{busy === "render" ? "FFmpeg 正在粗剪…" : "创建新粗剪版本"}</button>
+              <button className="secondary" disabled={!canRender || !center.mediaTools.roughCutReady || Boolean(busy) || !(project.currentStage === "GENERATION_REVIEW" || project.currentStage === "EDITING")} onClick={() => void renderRoughCut()}>{busy === "render" ? "FFmpeg 正在粗剪…" : "创建新粗剪版本"}</button>
             </div>
-            {(!center.mediaTools.ffmpegAvailable || !center.mediaTools.ffprobeAvailable) && <p className="tool-block">本机缺少 FFmpeg / ffprobe，粗剪按钮已拦截；质检记录仍可正常保存。</p>}
+            {!center.mediaTools.roughCutReady && <p className="tool-block">媒体预检缺少 {mediaMissing.join("、") || "必要能力"}，粗剪按钮已拦截；质检记录仍可正常保存。</p>}
           </article>
         </>
       )}
@@ -798,6 +883,11 @@ function DeliveryWorkspace({ project, onBack, onProjectUpdate, onError }: {
               <div><dt>报告</dt><dd>{render.reportPath}</dd></div>
               <div><dt>交付文件</dt><dd>{render.deliveryVideoPath ?? "尚未批准"}</dd></div>
             </dl>}
+            {render && render.status !== "failed" && <div className="delivery-downloads">
+              <a className="secondary" href={api.renderFileUrl(project.id, render.id, "video")} download>下载 MP4</a>
+              {render.subtitlePath && <a className="secondary" href={api.renderFileUrl(project.id, render.id, "subtitle")} download>下载 SRT</a>}
+              <a className="secondary" href={api.renderFileUrl(project.id, render.id, "report")} download>下载报告</a>
+            </div>}
           </article>
           <article className="delivery-decision">
             <header><span>HUMAN GATE</span><strong>成片终审</strong></header>
@@ -1201,7 +1291,7 @@ function ContextChecks({ project, health }: { project: Project; health: Health |
     ["付费 API", "已关闭", true],
     ["文字 Skill", health?.skillDrivenTextGeneration ? `${health.textSkills.length} 个已校验` : health?.skillLoadError ?? "未启用", health?.skillDrivenTextGeneration],
     ["H3 Skill", h3Skill ? h3Skill.version : "未载入", Boolean(h3Skill)],
-    ["FFmpeg", health?.mediaTools.ffmpegAvailable && health.mediaTools.ffprobeAvailable ? "已就绪" : "尚未检测到", Boolean(health?.mediaTools.ffmpegAvailable && health.mediaTools.ffprobeAvailable)],
+    ["媒体粗剪", health?.mediaTools.roughCutReady ? "已就绪" : health ? `缺 ${missingRoughCutCapabilities(health.mediaTools).join("/")}` : "检测中", Boolean(health?.mediaTools.roughCutReady)],
   ] as const;
   return (
     <>
@@ -1212,6 +1302,63 @@ function ContextChecks({ project, health }: { project: Project; health: Health |
       <div className="context-note"><span>审批原则</span><p>上游文件一旦修改，原审批自动失效；历史记录保留，不覆盖。</p></div>
       <div className="path-card"><small>项目主库</small><code title={project.projectDir}>{project.projectDir}</code></div>
     </>
+  );
+}
+
+function ArchiveProjectModal({ project, onClose, onArchive }: {
+  project: Project;
+  onClose: () => void;
+  onArchive: (projectId: string) => Promise<void>;
+}) {
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  async function confirm() {
+    setSaving(true);
+    setError(null);
+    try { await onArchive(project.id); }
+    catch (reason) { setError(reason instanceof Error ? reason.message : "删除项目失败"); setSaving(false); }
+  }
+  return (
+    <div className="modal-backdrop" role="presentation" onMouseDown={(event) => !saving && event.target === event.currentTarget && onClose()}>
+      <div className="project-modal archive-confirm-modal" role="dialog" aria-modal="true" aria-labelledby="archive-project-title">
+        <div className="modal-head"><div><span className="eyebrow">RECOVERABLE DELETE</span><h2 id="archive-project-title">删除项目“{project.title}”</h2></div><button type="button" className="close" disabled={saving} onClick={onClose}>×</button></div>
+        <div className="archive-confirm-body">
+          <div className="archive-symbol">⌫</div>
+          <div><strong>项目将从当前工作区移除</strong><p>项目目录、原始内容、资产、镜头、生成记录和全部历史版本都会原样保留。之后可从顶部“已归档”恢复。</p></div>
+          <dl><div><dt>当前阶段</dt><dd>{stageLabels[project.currentStage]}</dd></div><div><dt>项目目录</dt><dd title={project.projectDir}>{project.projectDir}</dd></div><div><dt>永久删除</dt><dd>否</dd></div></dl>
+        </div>
+        {error && <p className="form-error">{error}</p>}
+        <div className="modal-footer"><button type="button" className="secondary" disabled={saving} onClick={onClose}>取消</button><button type="button" className="danger-action" disabled={saving} onClick={() => void confirm()}>{saving ? "正在移入归档…" : "确认删除（可恢复）"}</button></div>
+      </div>
+    </div>
+  );
+}
+
+function ArchivedProjectsModal({ projects, loading, onClose, onRestore }: {
+  projects: Project[];
+  loading: boolean;
+  onClose: () => void;
+  onRestore: (projectId: string) => Promise<void>;
+}) {
+  const [restoringId, setRestoringId] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  async function restore(projectId: string) {
+    setRestoringId(projectId);
+    setError(null);
+    try { await onRestore(projectId); }
+    catch (reason) { setError(reason instanceof Error ? reason.message : "恢复项目失败"); setRestoringId(null); }
+  }
+  return (
+    <div className="modal-backdrop" role="presentation" onMouseDown={(event) => !restoringId && event.target === event.currentTarget && onClose()}>
+      <div className="project-modal archive-manager-modal" role="dialog" aria-modal="true" aria-labelledby="archived-projects-title">
+        <div className="modal-head"><div><span className="eyebrow">PROJECT ARCHIVE</span><h2 id="archived-projects-title">已归档项目</h2></div><button type="button" className="close" disabled={Boolean(restoringId)} onClick={onClose}>×</button></div>
+        <div className="archive-list">
+          {loading ? <div className="archive-empty"><div className="loader mini" /><span>正在读取归档…</span></div> : projects.length ? projects.map((project) => <article key={project.id}><div><strong>{project.title}</strong><span>{stageLabels[project.currentStage]} · 归档于 {project.archivedAt ? new Date(project.archivedAt).toLocaleString("zh-CN") : "未知时间"}</span><code>{project.projectDir}</code></div><button className="secondary" disabled={Boolean(restoringId)} onClick={() => void restore(project.id)}>{restoringId === project.id ? "正在恢复…" : "恢复项目"}</button></article>) : <div className="archive-empty"><strong>暂无归档项目</strong><span>删除的项目会保留在这里，需要时可恢复；系统不会自动清理。</span></div>}
+        </div>
+        {error && <p className="form-error">{error}</p>}
+        <div className="modal-footer"><button type="button" className="secondary" disabled={Boolean(restoringId)} onClick={onClose}>关闭</button></div>
+      </div>
+    </div>
   );
 }
 
@@ -1242,8 +1389,8 @@ function CreateProjectModal({ onClose, onCreate }: { onClose: () => void; onCrea
             <label className="full"><span>项目名称</span><input autoFocus required value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} placeholder="例如：雨夜来客" /></label>
             <label><span>输入类型</span><select value={form.sourceType} onChange={(e) => setForm({ ...form, sourceType: e.target.value as SourceType })}>{Object.entries(sourceLabels).map(([value, label]) => <option value={value} key={value}>{label}</option>)}</select></label>
             <label><span>目标时长（秒）</span><input required min="1" max="21600" type="number" value={form.targetDurationSec} onChange={(e) => setForm({ ...form, targetDurationSec: Number(e.target.value) })} /></label>
-            <label><span>画幅</span><select value={form.aspectRatio} onChange={(e) => setForm({ ...form, aspectRatio: e.target.value })}><option>16:9</option><option>9:16</option><option>1:1</option></select></label>
-            <label><span>分辨率</span><select value={form.resolution} onChange={(e) => setForm({ ...form, resolution: e.target.value })}><option>1920x1080</option><option>1080x1920</option><option>1280x720</option></select></label>
+            <label><span>画幅</span><select value={form.aspectRatio} onChange={(e) => { const aspectRatio = e.target.value; const options = outputResolutionOptions[aspectRatio]; setForm({ ...form, aspectRatio, resolution: options.includes(form.resolution) ? form.resolution : options[0] }); }}><option>16:9</option><option>9:16</option><option>1:1</option></select></label>
+            <label><span>成片输出规格（最低 480p）</span><select value={form.resolution} onChange={(e) => setForm({ ...form, resolution: e.target.value })}>{outputResolutionOptions[form.aspectRatio].map((resolution) => <option key={resolution}>{resolution}</option>)}</select></label>
             <label><span>视频类型</span><input value={form.videoType} onChange={(e) => setForm({ ...form, videoType: e.target.value })} /></label>
             <label><span>发布平台</span><input value={form.releasePlatform} onChange={(e) => setForm({ ...form, releasePlatform: e.target.value })} placeholder="可选" /></label>
             <label className="full"><span>视觉风格</span><input value={form.visualStyle} onChange={(e) => setForm({ ...form, visualStyle: e.target.value })} placeholder="例如：冷灰电影感，克制手持摄影" /></label>

@@ -1,6 +1,6 @@
 {
   "name": "ai-video-studio",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "private": true,
   "type": "module",
   "description": "Windows-local AI video production control room",
@@ -15,6 +15,9 @@
     "build:server": "node scripts/build-server.mjs",
     "build:ui": "vite build --config vite.config.ts",
     "start": "node dist/server/server.js",
+    "verify:media": "tsx scripts/verify-media-toolchain.ts",
+    "verify:phase5": "tsx scripts/verify-phase5.ts",
+    "verify:v1": "npm run check && npm run verify:media && npm run verify:phase5",
     "typecheck": "tsc --noEmit",
     "test": "vitest run --config vitest.config.ts",
     "check": "npm run typecheck && npm run test && npm run build"

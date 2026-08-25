@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { providerCapabilitiesSchema, shotSpecSchema } from "../src/shared/schemas";
+import { createProjectInputSchema, providerCapabilitiesSchema, shotSpecSchema } from "../src/shared/schemas";
 
 describe("shared contracts", () => {
   it("keeps unverified provider capabilities unknown", () => {
@@ -41,5 +41,22 @@ describe("shared contracts", () => {
       status: "draft",
     });
     expect(result.success).toBe(false);
+  });
+
+  it("accepts 480p output and rejects lower final output specifications", () => {
+    const base = {
+      title: "480p 项目",
+      sourceType: "story",
+      sourceText: "测试",
+      targetDurationSec: 10,
+      aspectRatio: "16:9",
+      videoType: "测试",
+      visualStyle: "",
+      releasePlatform: "",
+      targetAudience: "",
+      allowStorySuggestions: true,
+    };
+    expect(createProjectInputSchema.safeParse({ ...base, resolution: "854x480" }).success).toBe(true);
+    expect(createProjectInputSchema.safeParse({ ...base, resolution: "640x360" }).success).toBe(false);
   });
 });

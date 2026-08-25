@@ -1,7 +1,7 @@
 import { createHash, randomUUID } from "node:crypto";
 import fs from "node:fs/promises";
 import path from "node:path";
-import { and, desc, eq } from "drizzle-orm";
+import { and, desc, eq, isNotNull, isNull } from "drizzle-orm";
 import { stringify as toYaml } from "yaml";
 import type { StudioDatabase } from "../database/client";
 import { approvals, artifacts, assets as assetRecords, projects, shots } from "../database/schema";
@@ -27,8 +27,10 @@ import { preflightH3Shot } from "../handoff/h3-preflight";
 import { UpdreamPackageBuilder, type BootstrapSummary } from "../handoff/updream-package-builder";
 import {
   generationCenterSchema,
+  generationResolutionSchema,
   h3CapabilitiesSchema,
   h3PromptOutputSchema,
+  type GenerationResolution,
   type GenerationCenter,
   type HandoffPackageSummary,
 } from "../shared/handoff-schemas";
@@ -124,7 +126,7 @@ function isInside(parent: string, child: string): boolean {
 }
 
 function mapProjectRow(row: typeof projects.$inferSelect): Project {
-  return projectSchema.parse({ ...row, sourceType: row.sourceType, currentStage: row.currentStage, staleStages: row.staleStages });
+  return projectSchema.parse({ ...row, archivedAt: row.archivedAt ?? null, sourceType: row.sourceType, currentStage: row.currentStage, staleStages: row.staleStages });
 }
 
 function mapArtifactRow(row: typeof artifacts.$inferSelect): Artifact {
@@ -175,13 +177,44 @@ export class ProjectService {
   }
 
   async list(): Promise<Project[]> {
-    const rows = await this.studio.db.select().from(projects).orderBy(desc(projects.updatedAt));
+    const rows = await this.studio.db.select().from(projects).where(isNull(projects.archivedAt)).orderBy(desc(projects.updatedAt));
+    return rows.map(mapProjectRow);
+  }
+
+  async listArchived(): Promise<Project[]> {
+    const rows = await this.studio.db.select().from(projects).where(isNotNull(projects.archivedAt)).orderBy(desc(projects.archivedAt));
     return rows.map(mapProjectRow);
   }
 
   async get(id: string): Promise<Project | null> {
-    const [row] = await this.studio.db.select().from(projects).where(eq(projects.id, id)).limit(1);
+    const [row] = await this.studio.db.select().from(projects).where(and(eq(projects.id, id), isNull(projects.archivedAt))).limit(1);
     return row ? mapProjectRow(row) : null;
+  }
+
+  async archive(id: string): Promise<Project> {
+    const [row] = await this.studio.db.select().from(projects).where(eq(projects.id, id)).limit(1);
+    if (!row || row.archivedAt) throw new Error("项目不存在");
+    const project = mapProjectRow(row);
+    await fs.access(project.projectDir);
+    const archivedAt = new Date().toISOString();
+    const archived = projectSchema.parse({ ...project, archivedAt, updatedAt: archivedAt });
+    await this.writeProjectManifest(archived);
+    await this.appendLog(project.projectDir, "app.log.jsonl", { type: "project.archived", projectId: id, archivedAt });
+    await this.studio.db.update(projects).set({ archivedAt, updatedAt: archivedAt }).where(and(eq(projects.id, id), isNull(projects.archivedAt)));
+    return archived;
+  }
+
+  async restore(id: string): Promise<Project> {
+    const [row] = await this.studio.db.select().from(projects).where(and(eq(projects.id, id), isNotNull(projects.archivedAt))).limit(1);
+    if (!row) throw new Error("归档项目不存在");
+    const project = mapProjectRow(row);
+    await fs.access(project.projectDir);
+    const restoredAt = new Date().toISOString();
+    const restored = projectSchema.parse({ ...project, archivedAt: null, updatedAt: restoredAt });
+    await this.writeProjectManifest(restored);
+    await this.appendLog(project.projectDir, "app.log.jsonl", { type: "project.restored", projectId: id, restoredAt });
+    await this.studio.db.update(projects).set({ archivedAt: null, updatedAt: restoredAt }).where(and(eq(projects.id, id), isNotNull(projects.archivedAt)));
+    return restored;
   }
 
   async readSource(id: string): Promise<{ sourceText: string; sourcePath: string }> {
@@ -217,6 +250,7 @@ export class ProjectService {
         staleStages: [],
         sourcePath,
         projectDir,
+        archivedAt: null,
         createdAt: now,
         updatedAt: now,
       });
@@ -354,7 +388,7 @@ export class ProjectService {
     ]);
     const shotsWithStatus = await Promise.all(shotList.map(async (shot) => ({
       shot,
-      preflight: await preflightH3Shot(shot, assets, capabilities, project.aspectRatio, project.resolution),
+      preflight: await preflightH3Shot(shot, assets, capabilities, project.aspectRatio),
       packages: await this.updreamPackages.listShotPackages(project, shot.id),
     })));
     return generationCenterSchema.parse({
@@ -400,8 +434,9 @@ export class ProjectService {
     return { project: updated, bootstrap };
   }
 
-  async createUpdreamShotPackage(projectId: string, shotId: string): Promise<{ project: Project; package: HandoffPackageSummary }> {
+  async createUpdreamShotPackage(projectId: string, shotId: string, rawGenerationResolution: GenerationResolution): Promise<{ project: Project; package: HandoffPackageSummary }> {
     const project = await this.requireProject(projectId);
+    const generationResolution = generationResolutionSchema.parse(rawGenerationResolution);
     if (!(project.currentStage === "READY_FOR_GENERATION" || project.currentStage === "GENERATING")) {
       throw new Error("只有等待生成或重试生成阶段可以创建 Updream 镜头包");
     }
@@ -419,7 +454,7 @@ export class ProjectService {
     const storyboard = storyboardSchema.parse(JSON.parse(await fs.readFile(storyboardArtifact.structuredPath, "utf8")));
     const storyboardShot = storyboard.shots.find((item) => item.shotId === shotId);
     if (!storyboardShot) throw new Error("已批准分镜中缺少该镜头");
-    const preflight = await preflightH3Shot(shot, currentAssets, capabilities, project.aspectRatio, project.resolution);
+    const preflight = await preflightH3Shot(shot, currentAssets, capabilities, project.aspectRatio);
     if (!preflight.passed) throw new Error(`H3 参数预检未通过：${preflight.errors.join("；")}`);
     const generated = await this.textProvider.generateH3Prompt({
       project,
@@ -431,12 +466,12 @@ export class ProjectService {
     });
     const prompt = h3PromptOutputSchema.parse(generated.value);
     const packageSummary = await this.updreamPackages.createShotPackage({
-      project, shot, assets: currentAssets, preflight, prompt, trace: generated.trace,
+      project, shot, assets: currentAssets, preflight, prompt, trace: generated.trace, generationResolution,
       skills: providerSkills.map((skill) => skill.provenance),
     });
     await this.appendLog(project.projectDir, "handoff.log.jsonl", {
       type: "updream.shot-package.created", projectId, shotId, version: packageSummary.version,
-      path: packageSummary.path, mode: packageSummary.mode, createdAt: packageSummary.createdAt,
+      path: packageSummary.path, mode: packageSummary.mode, generationResolution: packageSummary.generationResolution, createdAt: packageSummary.createdAt,
     });
     return { project, package: packageSummary };
   }

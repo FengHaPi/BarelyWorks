@@ -2,7 +2,7 @@ import { constants as fsConstants } from "node:fs";
 import fs from "node:fs/promises";
 import path from "node:path";
 import type { TextGenerationTrace } from "../ai/text-provider";
-import { handoffPackageSummarySchema, type H3Preflight, type H3PromptOutput, type HandoffPackageSummary } from "../shared/handoff-schemas";
+import { handoffPackageSummarySchema, type GenerationResolution, type H3Preflight, type H3PromptOutput, type HandoffPackageSummary } from "../shared/handoff-schemas";
 import type { Asset, Project, ShotSpec } from "../shared/schemas";
 import type { SkillProvenance } from "../skills/skill-registry";
 
@@ -81,6 +81,9 @@ export class UpdreamPackageBuilder {
       if (!entry.isDirectory() || !/^v\d{3}$/.test(entry.name)) continue;
       const packagePath = path.join(root, entry.name);
       const manifest = JSON.parse(await fs.readFile(path.join(packagePath, "manifest.json"), "utf8")) as Record<string, unknown>;
+      const requestedSettings = manifest.requested_settings && typeof manifest.requested_settings === "object"
+        ? manifest.requested_settings as Record<string, unknown>
+        : {};
       const upload = await fs.readFile(path.join(packagePath, "upload-state.json"), "utf8")
         .then((content) => JSON.parse(content) as { state?: unknown }).catch(() => ({ state: "not-uploaded" }));
       packages.push(handoffPackageSummarySchema.parse({
@@ -90,6 +93,7 @@ export class UpdreamPackageBuilder {
         promptPath: path.join(packagePath, "prompt.txt"),
         createdAt: manifest.created_at,
         mode: manifest.mode,
+        generationResolution: requestedSettings.generation_resolution ?? "platform-default",
         uploadState: upload.state,
       }));
     }
@@ -104,6 +108,7 @@ export class UpdreamPackageBuilder {
     prompt: H3PromptOutput;
     trace: TextGenerationTrace;
     skills: SkillProvenance[];
+    generationResolution: GenerationResolution;
   }): Promise<HandoffPackageSummary> {
     const root = path.join(input.project.projectDir, "handoff", "updream", "shots", input.shot.id);
     await fs.mkdir(root, { recursive: true });
@@ -138,7 +143,8 @@ export class UpdreamPackageBuilder {
       requested_settings: {
         duration_sec: input.shot.durationSec,
         aspect_ratio: input.project.aspectRatio,
-        resolution: input.project.resolution,
+        generation_resolution: input.generationResolution,
+        output_resolution: input.project.resolution,
       },
       preflight: input.preflight,
       required_assets: requiredAssets,
@@ -161,11 +167,12 @@ export class UpdreamPackageBuilder {
       `# ${input.shot.id} / v${String(version).padStart(3, "0")} 人工投递`, "",
       "- [ ] 在 Updream 中选择 MiniMax H3", `- [ ] 模式：${input.prompt.mode}`,
       `- [ ] 时长：${input.shot.durationSec} 秒`, `- [ ] 画幅：${input.project.aspectRatio}`,
-      `- [ ] 分辨率：${input.project.resolution}（以平台实际可选项为准）`,
+      `- [ ] 本次生成清晰度：${input.generationResolution}（在 Updream 生产页选择，不写入提示词）`,
+      `- [ ] 本地成片输出规格：${input.project.resolution}（仅用于粗剪与交付）`,
       "- [ ] 按 reused-assets.md 选择已上传素材", "- [ ] 粘贴 prompt.txt 全文", "- [ ] 人工检查参数后提交",
       "- [ ] 提交成功后回到 AI Video Studio 手动标记状态", "", "> 本文件不会自动提交任务，也不会产生付费调用。",
     ].join("\n"), { encoding: "utf8", flag: "wx" });
-    return handoffPackageSummarySchema.parse({ shotId: input.shot.id, version, path: packagePath, promptPath: path.join(packagePath, "prompt.txt"), createdAt, mode: input.prompt.mode, uploadState: "not-uploaded" });
+    return handoffPackageSummarySchema.parse({ shotId: input.shot.id, version, path: packagePath, promptPath: path.join(packagePath, "prompt.txt"), createdAt, mode: input.prompt.mode, generationResolution: input.generationResolution, uploadState: "not-uploaded" });
   }
 
   async setPackageUploadState(project: Project, shotId: string, version: number, state: "not-uploaded" | "uploaded"): Promise<HandoffPackageSummary> {

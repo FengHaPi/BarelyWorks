@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { buildRoughCutArgs } from "../src/media/media-toolchain";
+import { buildRoughCutArgs, detectRequiredEncoders, resolveMediaToolPaths } from "../src/media/media-toolchain";
 
 describe("FFmpeg rough-cut arguments", () => {
   it("preserves output history and adds silence only for clips without audio", () => {
@@ -27,5 +27,29 @@ describe("FFmpeg rough-cut arguments", () => {
     expect(filters).toContain("[1:v:0]");
     expect(filters).toContain("[2:a:0]");
     expect(filters).toContain("concat=n=2:v=1:a=1");
+  });
+
+  it("prefers explicit paths and otherwise discovers the project-local portable directory", () => {
+    const explicit = resolveMediaToolPaths("C:\\studio", {
+      AI_VIDEO_STUDIO_FFMPEG_PATH: "D:\\media\\ffmpeg.exe",
+      AI_VIDEO_STUDIO_FFPROBE_PATH: "D:\\media\\ffprobe.exe",
+    }, "win32", () => false);
+    expect(explicit.ffmpegPath).toBe("D:\\media\\ffmpeg.exe");
+    expect(explicit.ffprobePath).toBe("D:\\media\\ffprobe.exe");
+
+    const portable = resolveMediaToolPaths("C:\\studio", {}, "win32", (filePath) => filePath.endsWith(".exe"));
+    expect(portable.ffmpegPath).toBe("C:\\studio\\tools\\ffmpeg\\bin\\ffmpeg.exe");
+    expect(portable.ffprobePath).toBe("C:\\studio\\tools\\ffmpeg\\bin\\ffprobe.exe");
+    expect(portable.setupDirectory).toBe("C:\\studio\\tools\\ffmpeg\\bin");
+  });
+
+  it("requires both libx264 and AAC encoders for the current rough-cut contract", () => {
+    const detected = detectRequiredEncoders(`
+ Encoders:
+ V....D libx264              libx264 H.264 / AVC
+ A..... aac                  AAC (Advanced Audio Coding)
+    `);
+    expect(detected).toEqual({ libx264Available: true, aacAvailable: true });
+    expect(detectRequiredEncoders(" V....D h264_nvenc H.264")).toEqual({ libx264Available: false, aacAvailable: false });
   });
 });

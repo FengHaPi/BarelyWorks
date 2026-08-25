@@ -26,7 +26,6 @@ export async function preflightH3Shot(
   assets: Asset[],
   capabilities: H3Capabilities,
   aspectRatio: string,
-  resolution: string,
 ): Promise<H3Preflight> {
   const errors: string[] = [];
   const warnings: string[] = [];
@@ -48,7 +47,7 @@ export async function preflightH3Shot(
   if (!capabilities.aspectRatios.includes(aspectRatio)) {
     errors.push(`画幅 ${aspectRatio} 不在已核实的 H3 画幅清单中`);
   }
-  warnings.push(`分辨率保持项目原值 ${resolution}；H3 官方资料仅确认默认短边 ${capabilities.defaultShortSide}px，投递时请人工核对平台选项`);
+  warnings.push(`生成清晰度不会写入 H3 提示词；创建镜头投递包时单独选择，并以 Updream 生产页实际选项为准。H3 资料中的默认短边 ${capabilities.defaultShortSide}px 只作能力参考，不是项目最低限制`);
 
   const references: H3ReferenceLabel[] = [];
   const counters = { image: 0, video: 0, audio: 0 };

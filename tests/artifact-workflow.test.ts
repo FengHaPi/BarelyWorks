@@ -15,10 +15,14 @@ const fakeMediaToolchain: MediaToolchain = {
     return {
       ffmpegAvailable: true,
       ffprobeAvailable: true,
+      libx264Available: true,
+      aacAvailable: true,
+      roughCutReady: true,
       ffmpegVersion: "ffmpeg test-double",
       ffprobeVersion: "ffprobe test-double",
       ffmpegPath: "test-ffmpeg",
       ffprobePath: "test-ffprobe",
+      setupDirectory: "test-tools/ffmpeg/bin",
     };
   },
   async probe(filePath) {
@@ -34,6 +38,12 @@ const fakeMediaToolchain: MediaToolchain = {
       formatName: "mov,mp4",
       sizeBytes: stat.size,
     };
+  },
+  async extractReviewFrames(request) {
+    await fs.mkdir(request.outputDirectory, { recursive: true });
+    const outputs = [1, 2, 3].map((index) => path.join(request.outputDirectory, `frame-${String(index).padStart(2, "0")}.jpg`));
+    await Promise.all(outputs.map((output) => fs.writeFile(output, "fake review frame", { encoding: "utf8", flag: "w" })));
+    return outputs;
   },
   async renderRoughCut(request) {
     await fs.writeFile(request.outputPath, "fake rough cut", { encoding: "utf8", flag: "wx" });
@@ -501,12 +511,18 @@ describe("versioned text workflow", () => {
     expect(bootstrap.statusCode).toBe(201);
     expect(bootstrap.json().project.currentStage).toBe("READY_FOR_GENERATION");
     expect(await fs.readFile(path.join(bootstrap.json().bootstrap.path, "asset-index.json"), "utf8")).toContain('"upload_state": "not-uploaded"');
-    const packageOne = await app.inject({ method: "POST", url: `/api/projects/${project.id}/handoff/updream/shots/S001/package` });
-    const packageTwo = await app.inject({ method: "POST", url: `/api/projects/${project.id}/handoff/updream/shots/S001/package` });
+    const packageOne = await app.inject({ method: "POST", url: `/api/projects/${project.id}/handoff/updream/shots/S001/package`, payload: { generationResolution: "480p" } });
+    const packageTwo = await app.inject({ method: "POST", url: `/api/projects/${project.id}/handoff/updream/shots/S001/package`, payload: { generationResolution: "1080p" } });
     expect(packageOne.statusCode).toBe(201);
     expect(packageOne.json().package.version).toBe(1);
     expect(packageTwo.json().package.version).toBe(2);
+    expect(packageOne.json().package.generationResolution).toBe("480p");
+    expect(packageTwo.json().package.generationResolution).toBe("1080p");
+    const packageSettings = JSON.parse(await fs.readFile(path.join(packageOne.json().package.path, "settings.json"), "utf8"));
+    expect(packageSettings).toMatchObject({ generation_resolution: "480p", output_resolution: "1280x720" });
+    expect(packageSettings).not.toHaveProperty("resolution");
     expect(await fs.readFile(packageOne.json().package.promptPath, "utf8")).toContain("integrated_multimodal_description:");
+    expect(await fs.readFile(packageOne.json().package.promptPath, "utf8")).not.toContain("480p");
     const submitted = await app.inject({ method: "PATCH", url: `/api/projects/${project.id}/handoff/updream/shots/S001/packages/2/upload-state`, payload: { state: "uploaded" } });
     expect(submitted.json().package.uploadState).toBe("uploaded");
     const assetUploaded = await app.inject({ method: "PATCH", url: `/api/projects/${project.id}/assets/CHAR-001/updream-upload-state`, payload: { state: "uploaded" } });
@@ -520,6 +536,10 @@ describe("versioned text workflow", () => {
     expect(imported.json().project.currentStage).toBe("GENERATION_REVIEW");
     expect(imported.json().imported).toHaveLength(1);
     expect(imported.json().imported[0].media).toMatchObject({ width: 1280, height: 720, durationSec: 15 });
+    expect(imported.json().imported[0].reviewFramePaths).toHaveLength(3);
+    const reviewFrame = await app.inject({ method: "GET", url: `/api/projects/${project.id}/generations/${imported.json().imported[0].id}/review-frames/0` });
+    expect(reviewFrame.statusCode).toBe(200);
+    expect(reviewFrame.headers["content-type"]).toContain("image/jpeg");
     expect(await fs.readFile(path.join(inboxPath, "S001_V01.mp4"), "utf8")).toBe("fake generated video");
 
     const qualityCenter = await app.inject({ method: "GET", url: `/api/projects/${project.id}/quality-center` });
@@ -562,6 +582,17 @@ describe("versioned text workflow", () => {
     expect(delivered.json().project.currentStage).toBe("DELIVERED");
     expect(delivered.json().render.deliveryVideoPath).toMatch(/deliverables[\\/]v001[\\/]final\.mp4$/);
     expect(await fs.readFile(delivered.json().render.deliveryVideoPath, "utf8")).toBe("fake rough cut");
+    const downloadedVideo = await app.inject({ method: "GET", url: `/api/projects/${project.id}/renders/${roughCut.json().render.id}/files/video` });
+    expect(downloadedVideo.statusCode).toBe(200);
+    expect(downloadedVideo.headers["content-disposition"]).toContain("attachment");
+    expect(downloadedVideo.body).toBe("fake rough cut");
+    const downloadedSubtitle = await app.inject({ method: "GET", url: `/api/projects/${project.id}/renders/${roughCut.json().render.id}/files/subtitle` });
+    expect(downloadedSubtitle.statusCode).toBe(200);
+    expect(downloadedSubtitle.headers["content-type"]).toContain("application/x-subrip");
+    const downloadedReport = await app.inject({ method: "GET", url: `/api/projects/${project.id}/renders/${roughCut.json().render.id}/files/report` });
+    expect(downloadedReport.statusCode).toBe(200);
+    expect(downloadedReport.headers["content-type"]).toContain("text/markdown");
+    expect(downloadedReport.body).toContain("ffprobe");
     await app.close();
   });
 });

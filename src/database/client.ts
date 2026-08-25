@@ -39,6 +39,7 @@ export function createStudioDatabase(runtimeRoot: string): StudioDatabase {
       stale_stages TEXT NOT NULL DEFAULT '[]',
       source_path TEXT NOT NULL,
       project_dir TEXT NOT NULL,
+      archived_at TEXT,
       created_at TEXT NOT NULL,
       updated_at TEXT NOT NULL
     );
@@ -128,6 +129,12 @@ export function createStudioDatabase(runtimeRoot: string): StudioDatabase {
     CREATE INDEX IF NOT EXISTS renders_project_version
       ON renders(project_id, version DESC);
   `);
+
+  const projectColumns = sqlite.prepare("PRAGMA table_info(projects)").all() as Array<{ name: string }>;
+  if (!projectColumns.some((column) => column.name === "archived_at")) {
+    sqlite.exec("ALTER TABLE projects ADD COLUMN archived_at TEXT");
+  }
+  sqlite.exec("CREATE INDEX IF NOT EXISTS projects_archive_updated ON projects(archived_at, updated_at DESC)");
 
   return {
     db: drizzle(sqlite, { schema }),

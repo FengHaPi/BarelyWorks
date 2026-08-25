@@ -4,6 +4,9 @@ import { assetSchema, projectSchema, shotSpecSchema } from "./schemas";
 export const h3ModeSchema = z.enum(["T2VA", "I2VA", "FL2VA", "L2VA", "Ref2VA"]);
 export type H3Mode = z.infer<typeof h3ModeSchema>;
 
+export const generationResolutionSchema = z.enum(["platform-default", "480p", "720p", "768p", "1080p"]);
+export type GenerationResolution = z.infer<typeof generationResolutionSchema>;
+
 export const h3ReferenceLabelSchema = z.object({
   assetId: z.string().min(1),
   label: z.string().regex(/^<(Subject|Picture|Video|Audio) \d+>$/),
@@ -75,6 +78,7 @@ export const handoffPackageSummarySchema = z.object({
   promptPath: z.string().min(1),
   createdAt: z.iso.datetime(),
   mode: h3ModeSchema,
+  generationResolution: generationResolutionSchema.default("platform-default"),
   uploadState: z.enum(["not-uploaded", "uploaded"]),
 });
 export type HandoffPackageSummary = z.infer<typeof handoffPackageSummarySchema>;

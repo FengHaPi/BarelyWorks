@@ -32,13 +32,29 @@ export const sourceTypeSchema = z.enum([
 ]);
 export type SourceType = z.infer<typeof sourceTypeSchema>;
 
+export const outputResolutionSchema = z.string().trim().min(1).max(40).superRefine((value, context) => {
+  const match = /^(\d{3,4})\s*[xX×]\s*(\d{3,4})$/.exec(value);
+  if (!match) {
+    context.addIssue({ code: "custom", message: "成片输出规格必须使用 宽x高 格式" });
+    return;
+  }
+  const width = Number(match[1]);
+  const height = Number(match[2]);
+  if (Math.min(width, height) < 480) {
+    context.addIssue({ code: "custom", message: "成片输出最低短边为 480px" });
+  }
+  if (Math.max(width, height) > 7_680) {
+    context.addIssue({ code: "custom", message: "成片输出最长边不能超过 7680px" });
+  }
+});
+
 export const projectSchema = z.object({
   id: z.uuid(),
   title: z.string().trim().min(1).max(120),
   sourceType: sourceTypeSchema,
   targetDurationSec: z.number().int().positive().max(21_600),
   aspectRatio: z.string().trim().min(1).max(20),
-  resolution: z.string().trim().min(1).max(40),
+  resolution: outputResolutionSchema,
   videoType: z.string().trim().max(80).nullable().default(null),
   visualStyle: z.string().trim().max(1_000).nullable().default(null),
   releasePlatform: z.string().trim().max(120).nullable().default(null),
@@ -48,6 +64,7 @@ export const projectSchema = z.object({
   staleStages: z.array(projectStageSchema).default([]),
   sourcePath: z.string().min(1),
   projectDir: z.string().min(1),
+  archivedAt: z.iso.datetime().nullable().default(null),
   createdAt: z.iso.datetime(),
   updatedAt: z.iso.datetime(),
 });
@@ -59,7 +76,7 @@ export const createProjectInputSchema = z.object({
   sourceText: z.string().min(1, "请输入原始内容").max(5_000_000),
   targetDurationSec: z.coerce.number().int().positive().max(21_600),
   aspectRatio: z.string().trim().min(1).default("16:9"),
-  resolution: z.string().trim().min(1).default("1920x1080"),
+  resolution: outputResolutionSchema.default("1920x1080"),
   videoType: z.string().trim().max(80).nullable().optional(),
   visualStyle: z.string().trim().max(1_000).nullable().optional(),
   releasePlatform: z.string().trim().max(120).nullable().optional(),

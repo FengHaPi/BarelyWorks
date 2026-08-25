@@ -16,6 +16,7 @@ export const projects = sqliteTable("projects", {
   staleStages: text("stale_stages", { mode: "json" }).$type<string[]>().notNull(),
   sourcePath: text("source_path").notNull(),
   projectDir: text("project_dir").notNull(),
+  archivedAt: text("archived_at"),
   createdAt: text("created_at").notNull(),
   updatedAt: text("updated_at").notNull(),
 });

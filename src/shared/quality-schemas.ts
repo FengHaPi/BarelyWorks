@@ -4,10 +4,14 @@ import { generationJobSchema, projectSchema, shotSpecSchema } from "./schemas";
 export const mediaToolStatusSchema = z.object({
   ffmpegAvailable: z.boolean(),
   ffprobeAvailable: z.boolean(),
+  libx264Available: z.boolean(),
+  aacAvailable: z.boolean(),
+  roughCutReady: z.boolean(),
   ffmpegVersion: z.string().nullable(),
   ffprobeVersion: z.string().nullable(),
   ffmpegPath: z.string(),
   ffprobePath: z.string(),
+  setupDirectory: z.string().min(1),
 });
 export type MediaToolStatus = z.infer<typeof mediaToolStatusSchema>;
 
@@ -28,6 +32,7 @@ export const importedGenerationSchema = generationJobSchema.extend({
   sourceFileName: z.string().min(1),
   sourceHash: z.string().regex(/^[a-f0-9]{64}$/i),
   importedPath: z.string().min(1),
+  reviewFramePaths: z.array(z.string().min(1)).default([]),
   generationVersion: z.number().int().positive(),
   media: mediaMetadataSchema,
   createdAt: z.iso.datetime(),

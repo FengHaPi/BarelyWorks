@@ -2,7 +2,7 @@ import { createHash, randomUUID } from "node:crypto";
 import { constants as fsConstants, createReadStream } from "node:fs";
 import fs from "node:fs/promises";
 import path from "node:path";
-import { and, desc, eq } from "drizzle-orm";
+import { and, desc, eq, isNull } from "drizzle-orm";
 import { stringify as toYaml } from "yaml";
 import type { StudioDatabase } from "../database/client";
 import { approvals, generationJobs, projects, qualityReviews, renders, shots } from "../database/schema";
@@ -74,12 +74,14 @@ function buildSrt(shotsInOrder: ShotSpec[], generationsByShot: Map<string, Impor
 
 export class QualityService {
   private readonly studioSkills: SkillRegistry;
+  private readonly mediaToolchain: MediaToolchain;
 
   constructor(
     private readonly studio: StudioDatabase,
-    private readonly mediaToolchain: MediaToolchain = new FfmpegMediaToolchain(),
+    mediaToolchain?: MediaToolchain,
   ) {
     this.studioSkills = new SkillRegistry(studio.runtimeRoot);
+    this.mediaToolchain = mediaToolchain ?? new FfmpegMediaToolchain(studio.runtimeRoot);
   }
 
   getMediaToolStatus() {
@@ -229,6 +231,25 @@ export class QualityService {
           if ((error as NodeJS.ErrnoException).code !== "EEXIST") throw error;
           if (await sha256File(importedPath) !== sourceHash) throw new Error("同版本目标文件已存在且哈希不同，拒绝覆盖");
         }
+        let reviewFramePaths: string[] = [];
+        let reviewFrameError: string | null = null;
+        if (mediaTools.ffmpegAvailable) {
+          const reviewFrameDirectory = path.join(versionDirectory, "review-frames");
+          if (!isInside(project.projectDir, reviewFrameDirectory)) throw new Error("关键帧输出路径越界");
+          try {
+            reviewFramePaths = await this.mediaToolchain.extractReviewFrames({
+              inputPath: importedPath,
+              durationSec: media.durationSec,
+              outputDirectory: reviewFrameDirectory,
+            });
+            if (reviewFramePaths.some((framePath) => !isInside(project.projectDir, framePath))) {
+              throw new Error("关键帧文件路径越界");
+            }
+          } catch (error) {
+            reviewFramePaths = [];
+            reviewFrameError = error instanceof Error ? error.message : String(error);
+          }
+        }
         const now = new Date().toISOString();
         const generation = importedGenerationSchema.parse({
           id: randomUUID(),
@@ -248,6 +269,7 @@ export class QualityService {
           sourceFileName: entry.name,
           sourceHash,
           importedPath,
+          reviewFramePaths,
           generationVersion,
           media,
           createdAt: now,
@@ -278,6 +300,8 @@ export class QualityService {
           sourceFileName: entry.name,
           sourceHash,
           importedPath,
+          reviewFramePaths,
+          reviewFrameError,
           media,
           createdAt: now,
         });
@@ -298,7 +322,7 @@ export class QualityService {
   async scanAllGenerationInboxes(): Promise<void> {
     const status = await this.mediaToolchain.getStatus();
     if (!status.ffprobeAvailable) return;
-    const rows = await this.studio.db.select().from(projects);
+    const rows = await this.studio.db.select().from(projects).where(isNull(projects.archivedAt));
     const candidates = rows.map((row) => projectSchema.parse(row)).filter((project) =>
       (["READY_FOR_GENERATION", "GENERATING", "GENERATION_REVIEW"] as ProjectStage[]).includes(project.currentStage));
     await Promise.all(candidates.map(async (project) => {
@@ -401,8 +425,14 @@ export class QualityService {
       throw new Error("只有生成质检完成后才能创建粗剪");
     }
     const mediaTools = await this.mediaToolchain.getStatus();
-    if (!mediaTools.ffmpegAvailable || !mediaTools.ffprobeAvailable) {
-      throw new Error("粗剪需要 FFmpeg 和 ffprobe；当前工具未就绪，未创建虚假成片");
+    if (!mediaTools.roughCutReady) {
+      const missing = [
+        !mediaTools.ffmpegAvailable && "FFmpeg",
+        !mediaTools.ffprobeAvailable && "ffprobe",
+        mediaTools.ffmpegAvailable && !mediaTools.libx264Available && "libx264 编码器",
+        mediaTools.ffmpegAvailable && !mediaTools.aacAvailable && "AAC 编码器",
+      ].filter(Boolean).join("、");
+      throw new Error(`粗剪媒体预检未通过：缺少 ${missing || "必要能力"}；未创建虚假成片`);
     }
     const [shotList, generationList, existingRenders] = await Promise.all([
       this.listShots(projectId),
@@ -635,12 +665,36 @@ export class QualityService {
     return { filePath: generation.importedPath, fileName: path.basename(generation.importedPath) };
   }
 
+  async readGenerationReviewFrame(projectId: string, jobId: string, index: number): Promise<{ filePath: string; fileName: string }> {
+    const project = await this.requireProject(projectId);
+    const generation = (await this.listGenerations(projectId)).find((item) => item.id === jobId);
+    if (!generation) throw new Error("生成任务不存在");
+    const filePath = generation.reviewFramePaths[index];
+    if (!filePath) throw new Error("质检关键帧不存在");
+    if (!isInside(project.projectDir, filePath)) throw new Error("质检关键帧路径越界");
+    await fs.access(filePath);
+    return { filePath, fileName: path.basename(filePath) };
+  }
+
   async readRenderMedia(projectId: string, renderId: string): Promise<{ filePath: string; fileName: string }> {
+    return this.readRenderFile(projectId, renderId, "video");
+  }
+
+  async readRenderFile(
+    projectId: string,
+    renderId: string,
+    kind: "video" | "subtitle" | "report",
+  ): Promise<{ filePath: string; fileName: string }> {
     const project = await this.requireProject(projectId);
     const render = (await this.listRenders(projectId)).find((item) => item.id === renderId);
     if (!render) throw new Error("粗剪版本不存在");
-    const filePath = render.deliveryVideoPath ?? render.videoPath;
-    if (!isInside(project.projectDir, filePath)) throw new Error("粗剪视频路径越界");
+    const filePath = kind === "video"
+      ? render.deliveryVideoPath ?? render.videoPath
+      : kind === "subtitle"
+        ? render.deliverySubtitlePath ?? render.subtitlePath
+        : render.deliveryReportPath ?? render.reportPath;
+    if (!filePath) throw new Error(kind === "subtitle" ? "该粗剪版本没有字幕文件" : "交付文件不存在");
+    if (!isInside(project.projectDir, filePath)) throw new Error("交付文件路径越界");
     await fs.access(filePath);
     return { filePath, fileName: path.basename(filePath) };
   }
@@ -666,7 +720,9 @@ export class QualityService {
   }
 
   private async requireProject(id: string): Promise<Project> {
-    const [row] = await this.studio.db.select().from(projects).where(eq(projects.id, id)).limit(1);
+    const [row] = await this.studio.db.select().from(projects)
+      .where(and(eq(projects.id, id), isNull(projects.archivedAt)))
+      .limit(1);
     if (!row) throw new Error("项目不存在");
     return projectSchema.parse({
       ...row,

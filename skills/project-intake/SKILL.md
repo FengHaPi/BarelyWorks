@@ -9,7 +9,7 @@ Treat the imported source as immutable evidence. Identify the furthest stage gen
 
 ## Workflow
 
-1. Read the source plus requested duration, aspect ratio, resolution, video type, style, platform, audience, references, and permission to suggest story changes.
+1. Read the source plus requested duration, aspect ratio, final-output specification, video type, style, platform, audience, references, and permission to suggest story changes. Keep final-output resolution as local delivery metadata; do not inject clarity or resolution words into model prompts.
 2. Classify as `story`, `screenplay`, `shooting-script`, or `storyboard` using observable structure.
 3. Preserve named characters, relationships, ending, key dialogue, and explicit camera/time constraints as facts.
 4. List missing or conflicting information. Use `unknown` rather than guessing.

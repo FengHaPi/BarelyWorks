@@ -3,6 +3,11 @@ dist/
 data/*.sqlite*
 projects/*
 !projects/.gitkeep
+tools/ffmpeg/bin/*
+!tools/ffmpeg/bin/.gitkeep
+tools/ffmpeg/backups/
+tools/ffmpeg/licenses/
+tools/ffmpeg/installation.json
 *.log
 .env
 .DS_Store

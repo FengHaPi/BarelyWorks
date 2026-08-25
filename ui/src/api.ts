@@ -1,4 +1,4 @@
-import type { Artifact, ArtifactType, Asset, AssetDesignMode, CreateProjectInput, GenerationCenter, GenerationScanResult, HandoffPackageSummary, Health, Project, ProjectStage, QualityCenter, QualityReview, QualityReviewInput, RenderRecord, ShotSpec } from "./types";
+import type { Artifact, ArtifactType, Asset, AssetDesignMode, CreateProjectInput, GenerationCenter, GenerationResolution, GenerationScanResult, HandoffPackageSummary, Health, Project, ProjectStage, QualityCenter, QualityReview, QualityReviewInput, RenderRecord, ShotSpec } from "./types";
 
 async function request<T>(url: string, init?: RequestInit): Promise<T> {
   const headers = new Headers(init?.headers);
@@ -15,12 +15,15 @@ async function request<T>(url: string, init?: RequestInit): Promise<T> {
 export const api = {
   health: () => request<Health>("/api/health"),
   listProjects: () => request<{ projects: Project[] }>("/api/projects"),
+  listArchivedProjects: () => request<{ projects: Project[] }>("/api/projects/archived"),
   createProject: (input: CreateProjectInput) =>
     request<{ project: Project }>("/api/projects", {
       method: "POST",
       body: JSON.stringify(input),
     }),
   getProject: (id: string) => request<{ project: Project }>(`/api/projects/${id}`),
+  archiveProject: (id: string) => request<{ project: Project; recoverable: true }>(`/api/projects/${id}`, { method: "DELETE" }),
+  restoreProject: (id: string) => request<{ project: Project }>(`/api/projects/${id}/restore`, { method: "POST" }),
   getSource: (id: string) => request<{ sourceText: string; sourcePath: string }>(`/api/projects/${id}/source`),
   listArtifacts: (id: string, type: ArtifactType) =>
     request<{ artifacts: Artifact[] }>(`/api/projects/${id}/artifacts/${type}`),
@@ -51,7 +54,7 @@ export const api = {
   generationCenter: (id: string) => request<GenerationCenter>(`/api/projects/${id}/generation-center`),
   lockAssets: (id: string) => request<{ project: Project }>(`/api/projects/${id}/handoff/updream/lock-assets`, { method: "POST" }),
   createUpdreamBootstrap: (id: string) => request<{ project: Project; bootstrap: GenerationCenter["bootstrap"] }>(`/api/projects/${id}/handoff/updream/bootstrap`, { method: "POST" }),
-  createUpdreamShotPackage: (id: string, shotId: string) => request<{ project: Project; package: HandoffPackageSummary }>(`/api/projects/${id}/handoff/updream/shots/${shotId}/package`, { method: "POST" }),
+  createUpdreamShotPackage: (id: string, shotId: string, generationResolution: GenerationResolution) => request<{ project: Project; package: HandoffPackageSummary }>(`/api/projects/${id}/handoff/updream/shots/${shotId}/package`, { method: "POST", body: JSON.stringify({ generationResolution }) }),
   readUpdreamPrompt: (id: string, shotId: string, version: number) => request<{ prompt: string; path: string }>(`/api/projects/${id}/handoff/updream/shots/${shotId}/packages/${version}/prompt`),
   setAssetUploadState: (id: string, assetId: string, state: "not-uploaded" | "uploaded") => request<{ asset: Asset }>(`/api/projects/${id}/assets/${assetId}/updream-upload-state`, {
     method: "PATCH", body: JSON.stringify({ state }),
@@ -62,11 +65,13 @@ export const api = {
   qualityCenter: (id: string) => request<QualityCenter>(`/api/projects/${id}/quality-center`),
   scanGenerationInbox: (id: string) => request<GenerationScanResult>(`/api/projects/${id}/generations/scan`, { method: "POST" }),
   generationMediaUrl: (id: string, jobId: string) => `/api/projects/${id}/generations/${jobId}/media`,
+  generationReviewFrameUrl: (id: string, jobId: string, index: number) => `/api/projects/${id}/generations/${jobId}/review-frames/${index}`,
   reviewGeneration: (id: string, jobId: string, input: QualityReviewInput) => request<{ project: Project; review: QualityReview }>(`/api/projects/${id}/generations/${jobId}/reviews`, {
     method: "POST", body: JSON.stringify(input),
   }),
   renderRoughCut: (id: string) => request<{ project: Project; render: RenderRecord }>(`/api/projects/${id}/renders/rough-cut`, { method: "POST" }),
   renderMediaUrl: (id: string, renderId: string) => `/api/projects/${id}/renders/${renderId}/media`,
+  renderFileUrl: (id: string, renderId: string, kind: "video" | "subtitle" | "report") => `/api/projects/${id}/renders/${renderId}/files/${kind}`,
   decideRender: (id: string, renderId: string, decision: "approved" | "rejected", comment: string) => request<{ project: Project; render: RenderRecord }>(`/api/projects/${id}/renders/${renderId}/decision`, {
     method: "POST", body: JSON.stringify({ decision, comment }),
   }),

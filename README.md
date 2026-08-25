@@ -3,6 +3,7 @@
 > Windows 本地优先的 AI 视频生产控制台：把故事、大纲、剧本、资产、导演脚本、分镜、生成投递、质检和交付放进一条可审核、可追溯的工作流。
 
 ![Project status](https://img.shields.io/badge/status-alpha-7c3aed)
+![Version](https://img.shields.io/badge/version-v0.1.1--alpha-6366f1)
 ![Node.js](https://img.shields.io/badge/Node.js-%3E%3D22-339933?logo=nodedotjs&logoColor=white)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178c6?logo=typescript&logoColor=white)
 ![License](https://img.shields.io/badge/license-MIT-22c55e)
@@ -10,11 +11,12 @@
 AI Video Studio 不是一个“输入一句话后全自动花钱生成”的黑盒。它优先解决生产过程中的版本混乱、人物漂移、镜头断裂、审批失效和素材重复上传问题：文字阶段由本地 Skill 驱动 Codex，视频阶段默认生成可人工投递的 H3 / Updream 包，付费视频 API 保持关闭。
 
 > [!IMPORTANT]
-> 当前版本处于 Alpha。核心文字生产链路已经跑通，真实视频导回、FFmpeg 粗剪和完整成片验收仍在继续建设。
+> 当前版本为 **v0.1.1 Alpha**。核心文字生产链路与 FFmpeg 合成媒体粗剪已经跑通；真实供应端视频导回、质量审核和完整成片交付仍在继续验收。
 
 ## 现在能做什么
 
 - 创建本地视频项目，保存不可变原始内容，并在重启后恢复。
+- 可恢复地删除项目，并从“已归档”列表恢复，不物理清除项目文件与历史版本。
 - 使用结构化 Skill 生成剧情大纲、影视剧本、资产定义、导演脚本和分镜。
 - 对每个阶段执行批准、驳回和重新生成；上游改变后自动让下游版本失效。
 - 建立人物、场景、道具、风格和声音资产，维护稳定 ID、版本、文件哈希及镜头引用。
@@ -22,6 +24,7 @@ AI Video Studio 不是一个“输入一句话后全自动花钱生成”的黑�
 - 上传 JPG、PNG、WebP 参考图并保存在项目本地，不把私人项目素材提交到 Git。
 - 生成带完整时间码的 ShotSpec，执行时长、资产引用和连续性检查。
 - 固定加载 MiniMax H3 提示词 Skill，生成 Updream 初始化包和逐镜头增量包。
+- 成片输出规格最低支持 480p；供应端生成清晰度在每次镜头投递时单独选择，不写入提示词。
 - 记录人工上传、生成版本、质量审核和交付状态，不伪造外部平台结果。
 - 保存 Codex 运行路由、Skill 哈希、线程、用量、耗时和失败诊断。
 
@@ -45,12 +48,12 @@ AI Video Studio 不是一个“输入一句话后全自动花钱生成”的黑�
 
 | 实施阶段 | 状态 | 当前结果 |
 |---|---|---|
-| Phase 0 · 环境与契约验证 | 基本完成 | Node、Codex JSONL、H3 Skill 已验证；FFmpeg 尚未安装 |
+| Phase 0 · 环境与契约验证 | 已完成 | Node、Codex JSONL、H3 Skill 已验证；项目便携 FFmpeg 9.0.1、ffprobe、libx264 与 AAC 已通过真实媒体自检 |
 | Phase 1 · 项目骨架和数据层 | 已完成 | React/Vite、Fastify、SQLite/Drizzle、状态机和本地恢复 |
 | Phase 2 · 故事、剧本和审批 | 已完成 | 大纲、剧本、版本、批准、驳回与失效链路 |
 | Phase 3 · 资产、导演脚本和分镜 | 已完成 | 资产库、参考图、ShotSpec、分镜和连续性检查 |
 | Phase 4 · H3 与 Updream 投递 | 已实现 | H3 预检、初始化包、逐镜头包和人工投递状态 |
-| Phase 5 · 导回、质检和粗剪 | 进行中 | 质量审核与媒体工具链已搭建，等待真实视频和 FFmpeg 验收 |
+| Phase 5 · 导回、质检和粗剪 | 本地实现完成 | 合成媒体已完整跑通导回、三点关键帧、九维审核、1080p 粗剪、SRT、终审交付与文件下载；等待真实供应端视频的视觉质量验收 |
 | Phase 6 · 增强自动化 | 未开始 | 仅在 V1 真实项目通过后评估 |
 
 最近一次本地端到端测试已完成新的资产定义 V002：15 项资产全部通过制作就绪校验，生成耗时约 4 分 29 秒，当前停在人工资产审核。运行时项目、日志和素材均由 `.gitignore` 排除，不会出现在公开仓库。
@@ -65,7 +68,7 @@ AI Video Studio 不是一个“输入一句话后全自动花钱生成”的黑�
 | 契约 | TypeScript + Zod + JSON Schema |
 | 文字智能 | 本地 Codex CLI + 项目内 `SKILL.md` 路由 |
 | 视频交接 | MiniMax H3 参数预检 + Updream 人工投递包 |
-| 媒体处理 | FFmpeg / ffprobe 适配层（本机尚未安装） |
+| 媒体处理 | 项目便携 FFmpeg 9.0.1 / ffprobe，libx264/AAC 能力预检与正式粗剪实现均已通过合成媒体自检 |
 
 ## 快速开始
 
@@ -105,6 +108,9 @@ npm start
 | `npm test` | 运行 Vitest 测试 |
 | `npm run build` | 构建服务端和前端 |
 | `npm run check` | 类型检查、测试和完整构建 |
+| `npm run verify:media` | 生成临时测试片段并验证探测、H.264/AAC 粗剪与输出参数 |
+| `npm run verify:phase5` | 用真实 FFmpeg 验证视频导回、九维审核、粗剪、SRT、终审交付和文件下载 |
+| `npm run verify:v1` | 执行完整构建测试、媒体自检和 Phase 5 端到端发布门禁 |
 | `npm start` | 启动已构建的本地应用 |
 
 ## Skill 路由
@@ -156,12 +162,14 @@ projects/             本地运行时项目，仅保留 .gitkeep
 - [更新日志](CHANGELOG.md)
 - [环境与契约证据](docs/phase-0-environment.md)
 - [本地项目与备份策略](docs/backup-policy.md)
+- [本地媒体工具链](docs/media-toolchain.md)
+- [V1 验收状态](docs/v1-acceptance.md)
 - [Updream 能力检查清单](docs/updream-capability-checklist.md)
 
 ## 已知限制
 
 - 当前是 Windows 本地单用户工作台，不提供远程多用户服务。
-- FFmpeg / ffprobe 尚未在本机安装，因此真实视频导回和粗剪未完成验收。
+- FFmpeg 合成媒体探测与粗剪已通过；真实供应端视频的导回、质量审核和完整项目交付仍需实际验收。
 - Updream 被视为人工生成端，不依赖未经验证的私有接口或网页自动化。
 - H3 提示词结构已校验，但视觉效果必须以真实生成结果为准。
 - 当前没有自动调用任何付费视频 API。

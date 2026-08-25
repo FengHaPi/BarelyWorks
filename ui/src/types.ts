@@ -36,6 +36,7 @@ export interface Project {
   staleStages: ProjectStage[];
   sourcePath: string;
   projectDir: string;
+  archivedAt: string | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -144,6 +145,7 @@ export interface ShotSpec {
 }
 
 export type H3Mode = "T2VA" | "I2VA" | "FL2VA" | "L2VA" | "Ref2VA";
+export type GenerationResolution = "platform-default" | "480p" | "720p" | "768p" | "1080p";
 export interface H3ReferenceLabel {
   assetId: string;
   label: string;
@@ -182,6 +184,7 @@ export interface HandoffPackageSummary {
   promptPath: string;
   createdAt: string;
   mode: H3Mode;
+  generationResolution: GenerationResolution;
   uploadState: "not-uploaded" | "uploaded";
 }
 export interface GenerationCenter {
@@ -196,10 +199,14 @@ export interface GenerationCenter {
 export interface MediaToolStatus {
   ffmpegAvailable: boolean;
   ffprobeAvailable: boolean;
+  libx264Available: boolean;
+  aacAvailable: boolean;
+  roughCutReady: boolean;
   ffmpegVersion: string | null;
   ffprobeVersion: string | null;
   ffmpegPath: string;
   ffprobePath: string;
+  setupDirectory: string;
 }
 
 export interface MediaMetadata {
@@ -229,6 +236,7 @@ export interface ImportedGeneration {
   sourceFileName: string;
   sourceHash: string;
   importedPath: string;
+  reviewFramePaths: string[];
   generationVersion: number;
   media: MediaMetadata;
   createdAt: string;
