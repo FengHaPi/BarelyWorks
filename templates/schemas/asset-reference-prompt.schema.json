@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "assetId", "role", "promptZh", "promptEn", "negativePrompt", "compositionNotes", "continuityLocks"],
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "asset-reference-prompt-v1" },
+    "assetId": { "type": "string", "pattern": "^(CHAR|SCENE|PROP|COSTUME|STYLE|REF)-[0-9]{3}$" },
+    "role": { "type": "string", "enum": ["主参考", "正面", "侧面", "背面", "表情", "服装", "其他"] },
+    "promptZh": { "type": "string", "minLength": 80 },
+    "promptEn": { "type": "string", "minLength": 80 },
+    "negativePrompt": { "type": "string", "minLength": 20 },
+    "compositionNotes": { "type": "array", "minItems": 1, "items": { "type": "string", "minLength": 1 } },
+    "continuityLocks": { "type": "array", "minItems": 2, "items": { "type": "string", "minLength": 1 } }
+  }
+}

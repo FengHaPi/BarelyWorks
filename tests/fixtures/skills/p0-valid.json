@@ -76,6 +76,7 @@
     "conflicts": []
   },
   "shooting-script-director": {
+    "schemaVersion": "shooting-script-v2",
     "targetDurationSec": 45,
     "shots": [{
       "id": "S001",
@@ -96,12 +97,24 @@
       "sound": ["雨声", "木门声"],
       "startState": "客栈空镜，门关闭",
       "endState": "旅人站在门内，面向柜台",
+      "physicalPlan": {
+        "schemaVersion": "shot-physical-plan-v1",
+        "applicability": {"displaySurfaces": false, "reflectiveSurfaces": false, "delayedStateChanges": false},
+        "entities": [{"instanceId": "traveler-real", "assetId": "CHAR-001", "domain": "real-space", "role": "现实旅人"}],
+        "cameraSegments": [{"startOffsetSec": 0, "endOffsetSec": 45, "viewpoint": "front", "screenDirection": "摄影机从门内保持人物由门口进入左侧区域"}],
+        "subjectOrientations": [{"startOffsetSec": 0, "endOffsetSec": 45, "instanceId": "traveler-real", "bodyFaces": "柜台", "headFaces": "柜台与室内", "gazeTarget": "柜台和周围环境"}],
+        "displayRelations": [],
+        "reflectionRelations": [],
+        "timedStateGates": [],
+        "feasibilityNotes": ["人物路径和摄影机后退空间可执行"]
+      },
       "preferredProvider": null,
       "status": "draft"
     }],
     "validationNotes": []
   },
   "storyboard-director": {
+    "schemaVersion": "storyboard-v2",
     "shots": [{
       "shotId": "S001",
       "startFrame": "门关闭，客栈内部昏暗",
@@ -112,6 +125,7 @@
       "sceneId": "SCENE-001",
       "requiredAssetIds": ["CHAR-001", "SCENE-001", "STYLE-001"],
       "continuityRisks": ["斗篷湿度"],
+      "physicalVerification": {"cameraBlocking": "pass", "displayGeometry": "not-applicable", "reflectionTopology": "not-applicable", "timedStateGates": "not-applicable", "notes": ["人物路径与门内推进机位可执行"]},
       "approved": false
     }],
     "globalContinuityNotes": ["保持冷灰夜景"]
@@ -121,5 +135,15 @@
     "issues": [],
     "passed": true,
     "uncheckedClaims": ["尚无生成视频，无法检查身份视觉一致性"]
+  },
+  "asset-reference-prompt-writer": {
+    "schemaVersion": "asset-reference-prompt-v1",
+    "assetId": "CHAR-001",
+    "role": "主参考",
+    "promptZh": "写实电影人物主参考图，单一成年东亚女性自然站立，完整展示固定脸型、锁骨长度黑发、冷灰蓝短外套、炭黑长裤与黑色细斜挎带，暖灰肤色，左眉尾下方浅痣，神情疲惫克制，背景简洁中性，正面略偏三分之二角度，面部、服装轮廓和手部无遮挡。",
+    "promptEn": "Live-action cinematic main character reference of one adult East Asian woman standing naturally, clearly preserving her fixed oval face, collarbone-length black hair, cool grey-blue short jacket, charcoal trousers, thin black cross-body strap, warm grey skin, and the small mole below the left eyebrow; restrained tired expression, clean neutral background, front three-quarter view, unobstructed face, silhouette, hands, and costume.",
+    "negativePrompt": "禁止多人、拼贴、文字、水印、夸张大眼、浓妆、鬼妆、血迹、身份漂移、改变发长、浅痣位置、服装颜色或斜挎带。",
+    "compositionNotes": ["单人物主参考", "正面三分之二全身构图", "面部与服装无遮挡"],
+    "continuityLocks": ["锁骨长度黑发且右侧发尾外翘", "左眉尾下方浅痣", "冷灰蓝外套与黑色斜挎带"]
   }
 }

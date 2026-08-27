@@ -1,11 +1,11 @@
 {
   "name": "ai-video-studio",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "private": true,
   "type": "module",
   "description": "Windows-local AI video production control room",
   "engines": {
-    "node": ">=22"
+    "node": ">=22.12.0"
   },
   "scripts": {
     "dev": "concurrently -n API,UI -c cyan,magenta \"npm:dev:server\" \"npm:dev:ui\"",
@@ -19,8 +19,11 @@
     "verify:phase5": "tsx scripts/verify-phase5.ts",
     "verify:v1": "npm run check && npm run verify:media && npm run verify:phase5",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run --config vitest.config.ts",
-    "check": "npm run typecheck && npm run test && npm run build"
+    "test": "npm run test:server && npm run test:ui",
+    "test:server": "vitest run --config vitest.config.ts",
+    "test:ui": "vitest run --config ui/vitest.config.ts",
+    "test:e2e": "npm run build:ui && playwright test",
+    "check": "npm run typecheck && npm run test && npm run build && npm run test:e2e"
   },
   "dependencies": {
     "@fastify/cors": "^11.1.0",
@@ -31,10 +34,12 @@
     "fastify": "^5.5.0",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
+    "sharp": "0.35.3",
     "yaml": "^2.8.1",
     "zod": "^4.1.5"
   },
   "devDependencies": {
+    "@playwright/test": "^1.62.1",
     "@types/better-sqlite3": "^7.6.13",
     "@types/node": "^24.3.0",
     "@types/react": "^19.1.12",

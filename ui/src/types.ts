@@ -41,6 +41,23 @@ export interface Project {
   updatedAt: string;
 }
 
+export type ProjectIntegrityStepId = "source" | ArtifactType | "generation" | "quality" | "delivery";
+
+export interface ProjectIntegrityIssue {
+  stepId: ProjectIntegrityStepId;
+  code: string;
+  message: string;
+  severity: "error" | "warning";
+}
+
+export interface ProjectIntegrityAudit {
+  projectId: string;
+  status: "healthy" | "blocked";
+  firstBlockedStepId: ProjectIntegrityStepId | null;
+  issues: ProjectIntegrityIssue[];
+  checkedAt: string;
+}
+
 export interface CreateProjectInput {
   title: string;
   sourceType: SourceType;
@@ -60,7 +77,10 @@ export interface Health {
   version: string;
   bind: string;
   paidVideoApiEnabled: boolean;
+  paidImageApiEnabled: boolean;
+  imageProvider: ImageProviderCapabilities;
   skillDrivenTextGeneration: boolean;
+  textModel: string;
   textSkills: SkillProvenance[];
   skillLoadError: string | null;
   mediaTools: MediaToolStatus;
@@ -92,8 +112,77 @@ export interface Artifact {
   content: string;
 }
 
+export interface GenerationReadiness {
+  status: "ready" | "blocked";
+  estimatedMajorBeats: number;
+  recommendedMinimumShots: number;
+  maximumProductShots: number;
+  minimumReliableDurationSec: number;
+  acknowledgementRequired: boolean;
+  acknowledgementReasons: string[];
+  issues: Array<{ severity: "warning" | "error"; code: string; message: string; suggestedFix: string }>;
+}
+
+export interface ContinuityIssue {
+  severity: "info" | "warning" | "error";
+  code: string;
+  message: string;
+  affectedIds: string[];
+  suggestedFix: string;
+  requiresReapproval: boolean;
+}
+
+export interface ContinuityReport {
+  checkedShotIds: string[];
+  issues: ContinuityIssue[];
+  passed: boolean;
+  uncheckedClaims: string[];
+}
+
+export interface ProjectOperationStatus {
+  key: string;
+  operation: string;
+  phase: string;
+  phaseLabel: string;
+  startedAt: string;
+  phaseStartedAt: string;
+}
+
+export interface StoryboardContinuityReviewSummary {
+  status: "completed" | "failed";
+  message: string | null;
+}
+
 export type AssetType = "character" | "scene" | "prop" | "costume" | "style" | "audio" | "reference";
 export type AssetDesignMode = "original-proposal" | "reference-first";
+export type AssetReferenceRole = "主参考" | "正面" | "侧面" | "背面" | "表情" | "服装" | "其他";
+
+export interface AssetReferencePromptRecord {
+  id: string;
+  schemaVersion: "asset-reference-prompt-v1";
+  version: number;
+  assetId: string;
+  role: AssetReferenceRole;
+  promptZh: string;
+  promptEn: string;
+  negativePrompt: string;
+  compositionNotes: string[];
+  continuityLocks: string[];
+  provider: string;
+  providerRunId: string;
+  createdAt: string;
+}
+
+export interface ImageProviderCapabilities {
+  provider: string;
+  displayName: string;
+  configured: boolean;
+  enabled: boolean;
+  requiresPayment: boolean;
+  supportsTextToImage: boolean;
+  supportedMimeTypes: Array<"image/png" | "image/jpeg" | "image/webp">;
+  reason: string | null;
+}
 
 export interface Asset {
   id: string;
@@ -115,6 +204,12 @@ export interface Asset {
   distinctiveFeatures: string[];
   negativeConstraints: string[];
   fileRoles: string[];
+  referencePrompts: AssetReferencePromptRecord[];
+  referenceBaseline?: {
+    productionReady: boolean;
+    designBasis: "source-grounded" | "creative-proposal" | "reference-guided";
+    designSummary: string;
+  } | null;
   continuityRules: string[];
   usage: string[];
   sourceEvidence: string[];
@@ -140,6 +235,22 @@ export interface ShotSpec {
   sound: string[];
   startState: string;
   endState: string;
+  physicalPlan: {
+    schemaVersion: "shot-physical-plan-v1";
+    cameraContinuityMode?: "single-take" | "intentional-cuts";
+    spaceTopology?: {
+      spaces: Array<{ spaceId: string; label: string }>;
+      boundaries: Array<{ boundaryId: string; fromSpaceId: string; toSpaceId: string; traversalAllowed: boolean; label: string }>;
+    };
+    applicability: { displaySurfaces: boolean; reflectiveSurfaces: boolean; delayedStateChanges: boolean };
+    entities: Array<{ instanceId: string; assetId: string | null; domain: "real-space" | "screen-space" | "reflection-only"; role: string }>;
+    cameraSegments: Array<{ startOffsetSec: number; endOffsetSec: number; viewpoint: "front" | "rear" | "profile" | "over-shoulder" | "point-of-view" | "insert" | "reflection-view" | "other"; screenDirection: string; spaceId?: string; positionAnchor?: string; lookAt?: string; transitionFromPrevious?: "initial" | "continuous" | "boundary-crossing" | "cut"; boundaryId?: string | null; transitionPath?: string | null }>;
+    subjectOrientations: Array<{ startOffsetSec: number; endOffsetSec: number; instanceId: string; bodyFaces: string; headFaces: string; gazeTarget: string }>;
+    displayRelations: Array<{ startOffsetSec: number; endOffsetSec: number; propId: string; holderInstanceId: string | null; surfaceType: "single-sided" | "dual-sided" | "unknown"; interactionMode: "user-reading" | "presenting-to-camera" | "not-in-use" | "other"; displayFaces: "holder" | "camera" | "other-subject" | "away"; visibleToInstanceIds: string[]; cameraReadable: boolean; readabilityMethod: "not-required" | "over-shoulder" | "side-angle" | "insert" | "reflection" | "intentional-presentation" | "other" }>;
+    reflectionRelations: Array<{ surfaceId: string; normalReflectionPairs: Array<{ realInstanceId: string; reflectionInstanceId: string }>; mirrorOnlyInstanceIds: string[]; realSpaceInstanceIds: string[]; boundaryVisibleInFrame: boolean }>;
+    timedStateGates: Array<{ stateId: string; startsAtOffsetSec: number; beforeState: string; afterState: string; noEarlyOccurrence: boolean }>;
+    feasibilityNotes: string[];
+  } | null;
   preferredProvider?: string | null;
   status: "draft" | "review" | "approved" | "stale" | "generating" | "generated" | "accepted" | "rejected";
 }
@@ -185,7 +296,22 @@ export interface HandoffPackageSummary {
   createdAt: string;
   mode: H3Mode;
   generationResolution: GenerationResolution;
+  requestedDurationSec: number | null;
+  sourceShotSpecHash: string | null;
+  promptPolicyVersion: string | null;
+  isStale: boolean;
+  staleReasons: string[];
   uploadState: "not-uploaded" | "uploaded";
+  promptCharacterCount: number;
+  promptLanguage: "zh" | "en" | "mixed";
+  requiredAssets: Array<{
+    assetId: string;
+    name: string;
+    labels: string[];
+    kinds: Array<"image" | "video" | "audio">;
+    roles: string[];
+    bootstrapFiles: string[];
+  }>;
 }
 export interface GenerationCenter {
   project: Project;
@@ -298,6 +424,11 @@ export interface QualityCenter {
   generations: ImportedGeneration[];
   reviews: QualityReview[];
   renders: RenderRecord[];
+  gateAudit: {
+    passed: boolean;
+    acceptedShotIds: string[];
+    blockers: string[];
+  };
 }
 
 export interface GenerationScanResult {

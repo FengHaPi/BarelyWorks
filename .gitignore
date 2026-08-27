@@ -12,3 +12,5 @@ tools/ffmpeg/installation.json
 .env
 .DS_Store
 Thumbs.db
+test-results/
+playwright-report/

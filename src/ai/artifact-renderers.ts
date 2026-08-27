@@ -69,7 +69,21 @@ export function renderAssetBible(assetBible: AssetBible): string {
 }
 
 export function renderShootingScript(shootingScript: ShootingScript): string {
-  const shots = shootingScript.shots.map((shot) => [
+  const shots = shootingScript.shots.map((shot) => {
+    const plan = shot.physicalPlan;
+    const physicalLines = !plan ? ["**物理计划：** 旧版镜头，未提供"] : [
+      `**物理计划：** 显示面 ${plan.applicability.displaySurfaces ? "适用" : "不适用"}；反射面 ${plan.applicability.reflectiveSurfaces ? "适用" : "不适用"}；延迟状态 ${plan.applicability.delayedStateChanges ? "适用" : "不适用"}`,
+      `**实体实例：** ${plan.entities.map((item) => `${item.instanceId}=${item.assetId ?? "无资产"}/${item.domain}/${item.role}`).join("；")}`,
+      `**摄影连续模式：** ${plan.cameraContinuityMode ?? "旧版未声明"}`,
+      `**空间拓扑：** ${plan.spaceTopology ? `${plan.spaceTopology.spaces.map((item) => `${item.spaceId}=${item.label}`).join("、")}；边界 ${plan.spaceTopology.boundaries.map((item) => `${item.boundaryId}:${item.fromSpaceId}↔${item.toSpaceId}${item.traversalAllowed ? "可通行" : "不可通行"}`).join("、") || "无"}` : "旧版未声明"}`,
+      `**摄影机段落：** ${plan.cameraSegments.map((item) => `${item.startOffsetSec.toFixed(2)}–${item.endOffsetSec.toFixed(2)}秒 ${item.viewpoint}，${item.screenDirection}${item.spaceId ? `；空间=${item.spaceId}，机位=${item.positionAnchor}，看向=${item.lookAt}，过渡=${item.transitionFromPrevious}${item.boundaryId ? `(${item.boundaryId})` : ""}${item.transitionPath ? `，路径=${item.transitionPath}` : ""}` : "；旧版无空间锚点"}`).join("；")}`,
+      `**人物朝向：** ${plan.subjectOrientations.map((item) => `${item.startOffsetSec.toFixed(2)}–${item.endOffsetSec.toFixed(2)}秒 ${item.instanceId} 身体=${item.bodyFaces}，头部=${item.headFaces}，视线=${item.gazeTarget}`).join("；") || "无"}`,
+      `**显示面关系：** ${plan.displayRelations.map((item) => `${item.startOffsetSec.toFixed(2)}–${item.endOffsetSec.toFixed(2)}秒 ${item.propId} 朝${item.displayFaces}，交互=${item.interactionMode}，摄影机读屏=${item.cameraReadable ? item.readabilityMethod : "否"}`).join("；") || "无"}`,
+      `**反射拓扑：** ${plan.reflectionRelations.map((item) => `${item.surfaceId}：正常镜像 ${item.normalReflectionPairs.length} 对，镜面独有 ${item.mirrorOnlyInstanceIds.join("/") || "无"}，现实实例 ${item.realSpaceInstanceIds.join("/") || "无"}，保留边界=${item.boundaryVisibleInFrame ? "是" : "否"}`).join("；") || "无"}`,
+      `**事件门：** ${plan.timedStateGates.map((item) => `${item.stateId}@${item.startsAtOffsetSec.toFixed(2)}秒，之前=${item.beforeState}，之后=${item.afterState}，禁止提前=${item.noEarlyOccurrence ? "是" : "否"}`).join("；") || "无"}`,
+      `**可执行性备注：** ${plan.feasibilityNotes.join("；") || "无"}`,
+    ];
+    return [
     `## ${shot.id} · ${shot.startTimeSec.toFixed(2)}–${shot.endTimeSec.toFixed(2)} 秒`,
     `**目的：** ${shot.purpose}`,
     `**景别 / 摄影：** ${shot.shotSize}；${shot.camera.position}；${shot.camera.movement}${shot.camera.lens ? `；${shot.camera.lens}` : ""}${shot.camera.composition ? `；${shot.camera.composition}` : ""}`,
@@ -79,7 +93,9 @@ export function renderShootingScript(shootingScript: ShootingScript): string {
     `**声音：** ${shot.sound.join("；") || "无"}`,
     `**起始状态：** ${shot.startState}`,
     `**结束状态：** ${shot.endState}`,
-  ].join("\n\n")).join("\n\n");
+    ...physicalLines,
+  ].join("\n\n");
+  }).join("\n\n");
   const notes = shootingScript.validationNotes.map((issue) => `- [${issue.severity}] ${issue.code}：${issue.message}`).join("\n") || "- 无";
   return [`# 时间码导演脚本 · ${shootingScript.targetDurationSec} 秒`, shots, "# 校验说明", notes].join("\n\n");
 }
@@ -93,6 +109,7 @@ export function renderStoryboard(storyboard: Storyboard): string {
     `**运动计划：** ${shot.motionPlan}`,
     `**资产引用：** ${shot.requiredAssetIds.join("、") || "无"}`,
     `**连续性风险：** ${shot.continuityRisks.join("；") || "无"}`,
+    `**物理核验：** ${shot.physicalVerification ? `摄影机=${shot.physicalVerification.cameraBlocking}；显示面=${shot.physicalVerification.displayGeometry}；反射=${shot.physicalVerification.reflectionTopology}；事件门=${shot.physicalVerification.timedStateGates}；${shot.physicalVerification.notes.join("；") || "无备注"}` : "旧版分镜，未提供"}`,
   ].join("\n\n")).join("\n\n");
   return ["# 分镜与关键帧设计", shots, "# 全局连续性说明", storyboard.globalContinuityNotes.map((item) => `- ${item}`).join("\n") || "- 无"].join("\n\n");
 }

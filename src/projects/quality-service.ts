@@ -6,7 +6,9 @@ import { and, desc, eq, isNull } from "drizzle-orm";
 import { stringify as toYaml } from "yaml";
 import type { StudioDatabase } from "../database/client";
 import { approvals, generationJobs, projects, qualityReviews, renders, shots } from "../database/schema";
+import { importedMediaIssues } from "../media/import-validation";
 import { FfmpegMediaToolchain, type MediaToolchain } from "../media/media-toolchain";
+import { bindHandoffPackageToShot, UpdreamPackageBuilder } from "../handoff/updream-package-builder";
 import {
   importedGenerationSchema,
   qualityCenterSchema,
@@ -14,6 +16,7 @@ import {
   qualityReviewSchema,
   renderRecordSchema,
   type ImportedGeneration,
+  type MediaToolStatus,
   type QualityCenter,
   type QualityReview,
   type QualityReviewInput,
@@ -30,6 +33,7 @@ import {
 } from "../shared/schemas";
 import { SkillRegistry } from "../skills/skill-registry";
 import { assertTransition } from "../workflow/state-machine";
+import { ProjectIntegrityService } from "./project-integrity-service";
 
 function isInside(parent: string, child: string): boolean {
   const relative = path.relative(path.resolve(parent), path.resolve(child));
@@ -75,10 +79,14 @@ function buildSrt(shotsInOrder: ShotSpec[], generationsByShot: Map<string, Impor
 export class QualityService {
   private readonly studioSkills: SkillRegistry;
   private readonly mediaToolchain: MediaToolchain;
+  private readonly updreamPackages = new UpdreamPackageBuilder();
+  private readonly failedInboxFiles = new Map<string, { fingerprint: string; reason: string; expiresAt: number }>();
+  private readonly knownInboxHashes = new Map<string, { fingerprint: string; hash: string }>();
 
   constructor(
     private readonly studio: StudioDatabase,
     mediaToolchain?: MediaToolchain,
+    private readonly integrityService = new ProjectIntegrityService(studio),
   ) {
     this.studioSkills = new SkillRegistry(studio.runtimeRoot);
     this.mediaToolchain = mediaToolchain ?? new FfmpegMediaToolchain(studio.runtimeRoot);
@@ -141,7 +149,7 @@ export class QualityService {
     }));
   }
 
-  async getQualityCenter(projectId: string): Promise<QualityCenter> {
+  async getQualityCenter(projectId: string, options: { agentFirst?: boolean } = {}): Promise<QualityCenter> {
     const project = await this.requireProject(projectId);
     const inboxPath = path.join(project.projectDir, "generated", "inbox");
     await fs.mkdir(inboxPath, { recursive: true });
@@ -153,6 +161,7 @@ export class QualityService {
       this.listQualityReviews(projectId),
       this.listRenders(projectId),
     ]);
+    const gateAudit = await this.auditGenerationGate(project, shotList, generations, reviews, options);
     return qualityCenterSchema.parse({
       project,
       mediaTools,
@@ -162,20 +171,22 @@ export class QualityService {
       generations,
       reviews,
       renders: renderList,
+      gateAudit,
     });
   }
 
-  async scanGenerationInbox(projectId: string, minimumAgeMs = 0): Promise<{
+  async scanGenerationInbox(projectId: string, minimumAgeMs = 0, knownMediaTools?: MediaToolStatus, options: { agentFirst?: boolean; signal?: AbortSignal; onProcessId?: (processId: number | null) => void } = {}): Promise<{
     project: Project;
     imported: ImportedGeneration[];
     skipped: Array<{ fileName: string; reason: string }>;
     errors: Array<{ fileName: string; reason: string }>;
   }> {
     let project = await this.requireProject(projectId);
-    if (!(["READY_FOR_GENERATION", "GENERATING", "GENERATION_REVIEW"] as ProjectStage[]).includes(project.currentStage)) {
+    if (!options.agentFirst && !(["READY_FOR_GENERATION", "GENERATING", "GENERATION_REVIEW"] as ProjectStage[]).includes(project.currentStage)) {
       throw new Error("只有等待生成、生成中或生成质检阶段才能导入视频");
     }
-    const mediaTools = await this.mediaToolchain.getStatus();
+    if (!options.agentFirst) await this.integrityService.assertCanContinue(projectId, "导入生成视频");
+    const mediaTools = knownMediaTools ?? await this.mediaToolchain.getStatus();
     if (!mediaTools.ffprobeAvailable) {
       throw new Error("未找到 ffprobe，无法验证并导入视频。请安装 FFmpeg 或设置 AI_VIDEO_STUDIO_FFPROBE_PATH");
     }
@@ -192,6 +203,7 @@ export class QualityService {
       .sort((left, right) => left.name.localeCompare(right.name));
 
     for (const entry of entries) {
+      if (options.signal?.aborted) throw new Error("视频导入扫描已取消");
       const match = /^(S\d{3})_V(\d{2,3})\.(mp4|mov|mkv|webm)$/i.exec(entry.name);
       if (!match) {
         skipped.push({ fileName: entry.name, reason: "命名不符合 S003_V01.mp4 规则" });
@@ -204,23 +216,56 @@ export class QualityService {
         errors.push({ fileName: entry.name, reason: `项目中不存在镜头 ${shotId}` });
         continue;
       }
+      const promptBlocker = await this.promptPackageBlocker(project, shot, generationVersion);
+      if (promptBlocker) {
+        errors.push({ fileName: entry.name, reason: promptBlocker });
+        continue;
+      }
+      const sourcePackage = (await this.updreamPackages.listShotPackages(project, shotId))
+        .find((item) => item.version === generationVersion) ?? null;
       const sourcePath = path.join(inboxPath, entry.name);
+      let sourceFingerprint: string | null = null;
+      let deterministicFailure = false;
       try {
         const stat = await fs.stat(sourcePath);
         if (Date.now() - stat.mtimeMs < minimumAgeMs) {
           skipped.push({ fileName: entry.name, reason: "文件仍可能在下载，稍后自动重试" });
           continue;
         }
-        const sourceHash = await sha256File(sourcePath);
+        sourceFingerprint = `${stat.size}:${stat.mtimeMs}:${stat.ctimeMs}`;
+        const cachedFailure = this.failedInboxFiles.get(sourcePath);
+        if (cachedFailure && cachedFailure.expiresAt <= Date.now()) this.failedInboxFiles.delete(sourcePath);
+        else if (cachedFailure?.fingerprint === sourceFingerprint) {
+          skipped.push({ fileName: entry.name, reason: `${cachedFailure.reason}（文件未变化，不重复探测）` });
+          continue;
+        }
+        if (stat.size > 8 * 1024 * 1024 * 1024) {
+          deterministicFailure = true;
+          throw new Error("视频文件超过 8 GB 导入上限");
+        }
+        const knownHash = this.knownInboxHashes.get(sourcePath);
+        const sourceHash = knownHash?.fingerprint === sourceFingerprint ? knownHash.hash : await sha256File(sourcePath);
+        this.knownInboxHashes.set(sourcePath, { fingerprint: sourceFingerprint, hash: sourceHash });
+        const existingVersion = [...existing, ...imported]
+          .find((job) => job.shotId === shotId && job.generationVersion === generationVersion);
+        if (existingVersion) {
+          if (existingVersion.sourceHash === sourceHash) {
+            skipped.push({ fileName: entry.name, reason: "该镜头版本已按相同文件哈希导入" });
+          } else {
+            errors.push({ fileName: entry.name, reason: `${shotId} V${String(generationVersion).padStart(3, "0")} 已存在且文件内容不同，历史版本不会被覆盖` });
+          }
+          continue;
+        }
         if ([...existing, ...imported].some((job) => job.sourceHash === sourceHash)) {
           skipped.push({ fileName: entry.name, reason: "相同文件哈希已经导入" });
           continue;
         }
-        if ([...existing, ...imported].some((job) => job.shotId === shotId && job.generationVersion === generationVersion)) {
-          errors.push({ fileName: entry.name, reason: `${shotId} V${String(generationVersion).padStart(3, "0")} 已存在，历史版本不会被覆盖` });
-          continue;
+        const media = await this.mediaToolchain.probe(sourcePath, { signal: options.signal, onProcessId: options.onProcessId });
+        const mediaIssues = importedMediaIssues(project, shot, media);
+        if (mediaIssues.length) {
+          deterministicFailure = true;
+          throw new Error(`视频规格未通过：${mediaIssues.join("；")}`);
         }
-        const media = await this.mediaToolchain.probe(sourcePath);
         const versionDirectory = path.join(project.projectDir, "generated", shotId, `v${String(generationVersion).padStart(3, "0")}`);
         const importedPath = path.join(versionDirectory, entry.name);
         if (!isInside(project.projectDir, importedPath)) throw new Error("导入目标路径越界");
@@ -241,6 +286,8 @@ export class QualityService {
               inputPath: importedPath,
               durationSec: media.durationSec,
               outputDirectory: reviewFrameDirectory,
+              signal: options.signal,
+              onProcessId: options.onProcessId,
             });
             if (reviewFramePaths.some((framePath) => !isInside(project.projectDir, framePath))) {
               throw new Error("关键帧文件路径越界");
@@ -275,7 +322,7 @@ export class QualityService {
           createdAt: now,
           updatedAt: now,
         });
-        if (!imported.length && project.currentStage !== "GENERATING") {
+        if (!options.agentFirst && !imported.length && project.currentStage !== "GENERATING") {
           project = await this.transition(project, "GENERATING", "generation.import.started");
         }
         await this.studio.db.insert(generationJobs).values({
@@ -287,6 +334,8 @@ export class QualityService {
           mode: generation.mode,
           status: generation.status,
           parameterHash: generation.parameterHash,
+          storyboardArtifactId: sourcePackage?.sourceStoryboardArtifactId ?? null,
+          shotPackageArtifactId: sourcePackage?.id ?? null,
           payload: generation,
         });
         await this.setShotStatus(project, shot, "generated");
@@ -305,12 +354,17 @@ export class QualityService {
           media,
           createdAt: now,
         });
+        this.failedInboxFiles.delete(sourcePath);
       } catch (error) {
-        errors.push({ fileName: entry.name, reason: error instanceof Error ? error.message : String(error) });
+        const reason = error instanceof Error ? error.message : String(error);
+        if (sourceFingerprint && deterministicFailure) {
+          this.failedInboxFiles.set(sourcePath, { fingerprint: sourceFingerprint, reason, expiresAt: Date.now() + 60_000 });
+        }
+        errors.push({ fileName: entry.name, reason });
       }
     }
 
-    if (imported.length) {
+    if (!options.agentFirst && imported.length) {
       const allJobs = [...existing, ...imported];
       if (shotList.length > 0 && shotList.every((shot) => allJobs.some((job) => job.shotId === shot.id)) && project.currentStage === "GENERATING") {
         project = await this.transition(project, "GENERATION_REVIEW", "generation.import.completed");
@@ -319,15 +373,26 @@ export class QualityService {
     return { project, imported, skipped, errors };
   }
 
-  async scanAllGenerationInboxes(): Promise<void> {
-    const status = await this.mediaToolchain.getStatus();
-    if (!status.ffprobeAvailable) return;
+  async scanAllGenerationInboxes(
+    runForProject: (projectId: string, scan: () => Promise<void>) => Promise<void> = async (_projectId, scan) => scan(),
+  ): Promise<void> {
     const rows = await this.studio.db.select().from(projects).where(isNull(projects.archivedAt));
     const candidates = rows.map((row) => projectSchema.parse(row)).filter((project) =>
       (["READY_FOR_GENERATION", "GENERATING", "GENERATION_REVIEW"] as ProjectStage[]).includes(project.currentStage));
+    if (!candidates.length) return;
+    const status = await this.mediaToolchain.getStatus();
+    if (!status.ffprobeAvailable) return;
     await Promise.all(candidates.map(async (project) => {
       try {
-        await this.scanGenerationInbox(project.id, 2_000);
+        await runForProject(project.id, async () => {
+          const result = await this.scanGenerationInbox(project.id, 2_000, status);
+          if (result.errors.length) await this.appendLog(project.projectDir, "provider-jobs.jsonl", {
+            type: "generation.inbox-scan.file-errors",
+            projectId: project.id,
+            errors: result.errors,
+            createdAt: new Date().toISOString(),
+          });
+        });
       } catch (error) {
         await this.appendLog(project.projectDir, "provider-jobs.jsonl", {
           type: "generation.inbox-scan.failed",
@@ -343,11 +408,22 @@ export class QualityService {
     project: Project;
     review: QualityReview;
     generation: ImportedGeneration;
+  }>;
+  async recordQualityReview(projectId: string, jobId: string, rawInput: QualityReviewInput, options?: { agentFirst?: boolean }): Promise<{
+    project: Project;
+    review: QualityReview;
+    generation: ImportedGeneration;
+  }>;
+  async recordQualityReview(projectId: string, jobId: string, rawInput: QualityReviewInput, options: { agentFirst?: boolean } = {}): Promise<{
+    project: Project;
+    review: QualityReview;
+    generation: ImportedGeneration;
   }> {
     let project = await this.requireProject(projectId);
-    if (project.currentStage !== "GENERATING" && project.currentStage !== "GENERATION_REVIEW") {
+    if (!options.agentFirst && project.currentStage !== "GENERATING" && project.currentStage !== "GENERATION_REVIEW") {
       throw new Error("只有生成中或生成质检阶段才能提交质量结论");
     }
+    if (!options.agentFirst) await this.integrityService.assertCanContinue(projectId, "提交质量结论");
     const input = qualityReviewInputSchema.parse(rawInput);
     const generations = await this.listGenerations(projectId);
     const generation = generations.find((item) => item.id === jobId);
@@ -355,6 +431,10 @@ export class QualityService {
     if (generation.status !== "review") throw new Error(`该生成版本当前状态为 ${generation.status}，不能重复质检`);
     const latestForShot = generations.find((item) => item.shotId === generation.shotId);
     if (latestForShot?.id !== generation.id) throw new Error("只能质检该镜头的最新生成版本");
+    const shot = (await this.listShots(projectId)).find((item) => item.id === generation.shotId);
+    if (!shot) throw new Error("生成任务对应镜头不存在");
+    const promptBlocker = await this.promptPackageBlocker(project, shot, generation.promptVersion);
+    if (promptBlocker) throw new Error(promptBlocker);
     if (await sha256File(generation.importedPath) !== generation.sourceHash) {
       throw new Error("导入视频已在数据库外发生变化，不能继续质检");
     }
@@ -388,18 +468,16 @@ export class QualityService {
         payload: review,
         createdAt: now,
       });
-      const accepted = review.decision === "accepted" || review.decision === "conditional-pass";
+      const accepted = review.decision === "accepted";
       const jobStatus: ImportedGeneration["status"] = accepted
         ? "accepted"
-        : review.decision === "manual-fix" ? "review" : "failed";
+        : review.decision === "manual-fix" || review.decision === "conditional-pass" ? "review" : "failed";
       const updatedGeneration = importedGenerationSchema.parse({ ...generation, status: jobStatus, updatedAt: now });
       await this.studio.db.update(generationJobs)
         .set({ status: jobStatus, payload: updatedGeneration })
         .where(eq(generationJobs.id, jobId));
-      const shot = (await this.listShots(projectId)).find((item) => item.id === generation.shotId);
-      if (!shot) throw new Error("生成任务对应镜头不存在");
-      await this.setShotStatus(project, shot, accepted ? "accepted" : review.decision === "manual-fix" ? "generated" : "rejected");
-      if (!accepted && review.decision !== "manual-fix" && project.currentStage === "GENERATION_REVIEW") {
+      await this.setShotStatus(project, shot, accepted ? "accepted" : review.decision === "manual-fix" || review.decision === "conditional-pass" ? "generated" : "rejected");
+      if (!options.agentFirst && !accepted && review.decision !== "manual-fix" && review.decision !== "conditional-pass" && project.currentStage === "GENERATION_REVIEW") {
         project = await this.transition(project, "GENERATING", "generation.retry.requested");
       }
       await this.appendLog(project.projectDir, "provider-jobs.jsonl", {
@@ -419,11 +497,12 @@ export class QualityService {
     }
   }
 
-  async renderRoughCut(projectId: string): Promise<{ project: Project; render: RenderRecord }> {
+  async renderRoughCut(projectId: string, options: { agentFirst?: boolean; signal?: AbortSignal; onProcessId?: (processId: number | null) => void } = {}): Promise<{ project: Project; render: RenderRecord }> {
     let project = await this.requireProject(projectId);
-    if (project.currentStage !== "GENERATION_REVIEW" && project.currentStage !== "EDITING") {
+    if (!options.agentFirst && project.currentStage !== "GENERATION_REVIEW" && project.currentStage !== "EDITING") {
       throw new Error("只有生成质检完成后才能创建粗剪");
     }
+    if (!options.agentFirst) await this.integrityService.assertCanContinue(projectId, "创建粗剪");
     const mediaTools = await this.mediaToolchain.getStatus();
     if (!mediaTools.roughCutReady) {
       const missing = [
@@ -434,21 +513,25 @@ export class QualityService {
       ].filter(Boolean).join("、");
       throw new Error(`粗剪媒体预检未通过：缺少 ${missing || "必要能力"}；未创建虚假成片`);
     }
-    const [shotList, generationList, existingRenders] = await Promise.all([
+    const [shotList, generationList, reviews, existingRenders] = await Promise.all([
       this.listShots(projectId),
       this.listGenerations(projectId),
+      this.listQualityReviews(projectId),
       this.listRenders(projectId),
     ]);
+    const gateAudit = await this.auditGenerationGate(project, shotList, generationList, reviews, options);
+    if (!gateAudit.passed) {
+      throw new Error(`生成审核门禁未通过，不能创建粗剪：${gateAudit.blockers.join("；")}`);
+    }
     const acceptedByShot = new Map<string, ImportedGeneration>();
     for (const shot of shotList) {
-      const accepted = generationList
-        .filter((item) => item.shotId === shot.id && item.status === "accepted")
-        .sort((left, right) => right.generationVersion - left.generationVersion)[0];
+      const accepted = generationList.find((item) => item.shotId === shot.id);
       if (accepted) acceptedByShot.set(shot.id, accepted);
     }
-    const missing = shotList.filter((shot) => !acceptedByShot.has(shot.id)).map((shot) => shot.id);
-    if (!shotList.length || missing.length) {
-      throw new Error(`所有镜头必须有已通过的生成版本；待完成：${missing.join("、") || "无镜头"}`);
+    for (const generation of acceptedByShot.values()) {
+      if (await sha256File(generation.importedPath) !== generation.sourceHash) {
+        throw new Error(`${generation.shotId} 的已接受视频在质检后发生变化，必须重新导入并审核`);
+      }
     }
     const resolution = /^(\d+)\s*[xX×]\s*(\d+)$/.exec(project.resolution);
     if (!resolution) throw new Error(`无法解析项目分辨率：${project.resolution}`);
@@ -487,11 +570,12 @@ export class QualityService {
       videoPath,
       subtitlePath,
       reportPath,
+      sourceJobIds: render.sourceJobIds,
       payload: render,
       createdAt: now,
       updatedAt: now,
     });
-    if (project.currentStage === "GENERATION_REVIEW") {
+    if (!options.agentFirst && project.currentStage === "GENERATION_REVIEW") {
       project = await this.transition(project, "EDITING", "rough-cut.started");
     }
     try {
@@ -505,8 +589,10 @@ export class QualityService {
         height: Number(resolution[2]),
         outputPath: videoPath,
         logPath,
+        signal: options.signal,
+        onProcessId: options.onProcessId,
       });
-      const media = await this.mediaToolchain.probe(videoPath);
+      const media = await this.mediaToolchain.probe(videoPath, { signal: options.signal, onProcessId: options.onProcessId });
       const finishedAt = new Date().toISOString();
       const report = [
         `# ${project.title} 粗剪报告 V${String(version).padStart(3, "0")}`,
@@ -533,7 +619,7 @@ export class QualityService {
       await this.studio.db.update(renders)
         .set({ status: render.status, payload: render, updatedAt: finishedAt })
         .where(eq(renders.id, render.id));
-      project = await this.transition(project, "FINAL_REVIEW", "rough-cut.completed");
+      if (!options.agentFirst) project = await this.transition(project, "FINAL_REVIEW", "rough-cut.completed");
       await this.appendLog(project.projectDir, "render.log.jsonl", {
         type: "rough-cut.completed",
         projectId,
@@ -574,16 +660,33 @@ export class QualityService {
     renderId: string,
     decision: "approved" | "rejected",
     comment?: string,
+    options: { agentFirst?: boolean } = {},
   ): Promise<{ project: Project; render: RenderRecord; approval: ApprovalRecord }> {
     let project = await this.requireProject(projectId);
-    if (project.currentStage !== "FINAL_REVIEW") {
+    if (!options.agentFirst && project.currentStage !== "FINAL_REVIEW") {
       throw new Error("只有成片终审阶段可以批准或驳回交付版本");
     }
+    if (decision === "approved" && !options.agentFirst) await this.integrityService.assertCanContinue(projectId, "批准交付版本");
     if (decision === "rejected" && !comment?.trim()) throw new Error("驳回成片时必须填写修改意见");
     const renderList = await this.listRenders(projectId);
     const current = renderList.find((item) => item.id === renderId);
     if (!current || current.status !== "review") throw new Error("只能审核当前待终审粗剪版本");
     if (renderList[0]?.id !== current.id) throw new Error("只能审核最新粗剪版本");
+    if (decision === "approved") {
+      const [shotList, generationList, reviews] = await Promise.all([
+        this.listShots(projectId),
+        this.listGenerations(projectId),
+        this.listQualityReviews(projectId),
+      ]);
+      const gateAudit = await this.auditGenerationGate(project, shotList, generationList, reviews, options);
+      if (!gateAudit.passed) {
+        throw new Error(`生成审核门禁已失效，不能批准交付：${gateAudit.blockers.join("；")}`);
+      }
+      const currentSourceJobIds = shotList.map((shot) => generationList.find((item) => item.shotId === shot.id)?.id);
+      const missingOrDifferentSource = currentSourceJobIds.some((jobId) => !jobId || !current.sourceJobIds.includes(jobId))
+        || current.sourceJobIds.some((jobId) => !currentSourceJobIds.includes(jobId));
+      if (missingOrDifferentSource) throw new Error("当前粗剪绑定的生成版本不是各镜头最新正式通过版本，必须重新创建粗剪");
+    }
     const now = new Date().toISOString();
     let updatedRender = current;
     let artifactPath = current.videoPath;
@@ -638,11 +741,13 @@ export class QualityService {
     await this.studio.db.update(renders)
       .set({ status: updatedRender.status, payload: updatedRender, updatedAt: now })
       .where(eq(renders.id, renderId));
-    project = await this.transition(
-      project,
-      decision === "approved" ? "DELIVERED" : "EDITING",
-      decision === "approved" ? "delivery.approved" : "delivery.rejected",
-    );
+    if (!options.agentFirst) {
+      project = await this.transition(
+        project,
+        decision === "approved" ? "DELIVERED" : "EDITING",
+        decision === "approved" ? "delivery.approved" : "delivery.rejected",
+      );
+    }
     await this.appendLog(project.projectDir, "render.log.jsonl", {
       type: decision === "approved" ? "delivery.approved" : "delivery.rejected",
       projectId,
@@ -697,6 +802,71 @@ export class QualityService {
     if (!isInside(project.projectDir, filePath)) throw new Error("交付文件路径越界");
     await fs.access(filePath);
     return { filePath, fileName: path.basename(filePath) };
+  }
+
+  private async promptPackageBlocker(project: Project, shot: ShotSpec, promptVersion: number): Promise<string | null> {
+    try {
+      const packageSummary = (await this.updreamPackages.listShotPackages(project, shot.id))
+        .find((item) => item.version === promptVersion);
+      if (!packageSummary) return `${shot.id} V${String(promptVersion).padStart(3, "0")} 缺少对应提示词投递包`;
+      const bound = bindHandoffPackageToShot(packageSummary, shot);
+      if (bound.isStale) return `${shot.id} V${String(promptVersion).padStart(3, "0")} 的提示词投递包已失效：${bound.staleReasons.join("；")}`;
+      if (!isInside(project.projectDir, bound.promptPath)) return `${shot.id} 的提示词路径越界`;
+      const prompt = (await fs.readFile(bound.promptPath, "utf8")).trim();
+      if (!prompt) return `${shot.id} V${String(promptVersion).padStart(3, "0")} 的提示词为空`;
+      return null;
+    } catch (error) {
+      return `${shot.id} V${String(promptVersion).padStart(3, "0")} 的提示词证据不可读取：${error instanceof Error ? error.message : String(error)}`;
+    }
+  }
+
+  private isFullyAcceptedReview(review: QualityReview): boolean {
+    return review.decision === "accepted"
+      && review.dimensions.every((item) => item.status === "pass")
+      && review.conditions.length === 0
+      && review.unverifiedClaims.length === 0;
+  }
+
+  private async auditGenerationGate(
+    project: Project,
+    shotList: ShotSpec[],
+    generationList: ImportedGeneration[],
+    reviews: QualityReview[],
+    options: { agentFirst?: boolean } = {},
+  ): Promise<{ passed: boolean; acceptedShotIds: string[]; blockers: string[] }> {
+    const blockers: string[] = [];
+    const acceptedShotIds: string[] = [];
+    if (!options.agentFirst && project.staleStages.length) blockers.push(`项目仍有失效环节：${project.staleStages.join("、")}`);
+    if (!shotList.length) blockers.push("项目没有可用于生成的镜头");
+    for (const shot of shotList) {
+      const generation = generationList.find((item) => item.shotId === shot.id);
+      if (!generation) {
+        blockers.push(`${shot.id} 尚未导入生成视频`);
+        continue;
+      }
+      const promptBlocker = await this.promptPackageBlocker(project, shot, generation.promptVersion);
+      if (promptBlocker) blockers.push(promptBlocker);
+      const latestReview = reviews.find((item) => item.jobId === generation.id);
+      const versionLabel = `${shot.id} V${String(generation.generationVersion).padStart(3, "0")}`;
+      if (!latestReview) {
+        blockers.push(`${versionLabel} 尚未人工审核`);
+        continue;
+      }
+      if (latestReview.decision === "conditional-pass") {
+        blockers.push(`${versionLabel} 仅为有条件通过，条件未闭环`);
+        continue;
+      }
+      if (!this.isFullyAcceptedReview(latestReview)) {
+        blockers.push(`${versionLabel} 最新结论为“${latestReview.decision}”，不是九维全部正式通过`);
+        continue;
+      }
+      if (generation.status !== "accepted") {
+        blockers.push(`${versionLabel} 审核记录与生成状态不一致`);
+        continue;
+      }
+      acceptedShotIds.push(shot.id);
+    }
+    return { passed: blockers.length === 0, acceptedShotIds, blockers };
   }
 
   private async listShots(projectId: string): Promise<ShotSpec[]> {

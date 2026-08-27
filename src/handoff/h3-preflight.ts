@@ -3,7 +3,11 @@ import { createHash } from "node:crypto";
 import path from "node:path";
 import type { H3Capabilities, H3Preflight, H3ReferenceLabel } from "../shared/handoff-schemas";
 import { h3PreflightSchema } from "../shared/handoff-schemas";
+import { h3ProductDurationMin, isH3ProductDurationCompatible } from "../shared/h3-duration-policy";
 import type { Asset, ShotSpec } from "../shared/schemas";
+import { inspectPhysicalPlan, inspectPhysicalVerification, type PhysicalVerificationLike } from "../shared/physical-plan";
+import { inspectShotModelExecutability } from "../shared/h3-executability";
+import { isReferenceRoleAllowed } from "../shared/asset-reference-role";
 
 const imageExtensions = new Set([".png", ".jpg", ".jpeg", ".webp", ".bmp"]);
 const videoExtensions = new Set([".mp4", ".mov", ".webm", ".mkv"]);
@@ -26,6 +30,7 @@ export async function preflightH3Shot(
   assets: Asset[],
   capabilities: H3Capabilities,
   aspectRatio: string,
+  storyboardShot?: { physicalVerification?: PhysicalVerificationLike | null },
 ): Promise<H3Preflight> {
   const errors: string[] = [];
   const warnings: string[] = [];
@@ -41,11 +46,36 @@ export async function preflightH3Shot(
   for (const asset of requiredAssets) {
     if (!asset.approved) errors.push(`资产 ${asset.id} 尚未批准`);
   }
-  if (shot.durationSec < capabilities.durationMinSec || shot.durationSec > capabilities.durationMaxSec) {
-    errors.push(`H3 单镜头时长必须为 ${capabilities.durationMinSec}–${capabilities.durationMaxSec} 秒，当前为 ${shot.durationSec} 秒`);
+  const productDurationMinSec = h3ProductDurationMin(capabilities.durationMinSec);
+  if (!isH3ProductDurationCompatible(shot.durationSec, capabilities.durationMinSec, capabilities.durationMaxSec)) {
+    errors.push(`H3 单镜头时长必须为 ${productDurationMinSec}–${Math.floor(capabilities.durationMaxSec)} 的整数秒，当前为 ${shot.durationSec} 秒`);
+  }
+  if (!Number.isInteger(shot.startTimeSec) || !Number.isInteger(shot.endTimeSec)) {
+    errors.push(`H3 镜头起止时间必须按整数秒连续衔接，当前为 ${shot.startTimeSec}–${shot.endTimeSec} 秒`);
   }
   if (!capabilities.aspectRatios.includes(aspectRatio)) {
     errors.push(`画幅 ${aspectRatio} 不在已核实的 H3 画幅清单中`);
+  }
+  if (!shot.physicalPlan) {
+    warnings.push(`${shot.id} 来自旧版导演脚本，没有结构化 physicalPlan；若要启用屏幕朝向、镜面拓扑和事件时序硬校验，请重新生成导演脚本与分镜`);
+  } else {
+    for (const problem of inspectShotModelExecutability(shot)) {
+      const message = `${problem.code}：AI 模型可执行性检查：${problem.message} ${problem.suggestedFix}`;
+      if (problem.severity === "error") errors.push(message);
+      else warnings.push(message);
+    }
+    for (const problem of inspectPhysicalPlan(shot.physicalPlan, shot.durationSec, shot.characterIds, shot.propIds)) {
+      const message = `${problem.code}：${problem.message}`;
+      if (problem.severity === "error") errors.push(message);
+      else warnings.push(message);
+    }
+    if (storyboardShot) {
+      for (const problem of inspectPhysicalVerification(shot.physicalPlan, storyboardShot.physicalVerification)) {
+        const message = `${problem.code}：${problem.message}`;
+        if (problem.severity === "error") errors.push(message);
+        else warnings.push(message);
+      }
+    }
   }
   warnings.push(`生成清晰度不会写入 H3 提示词；创建镜头投递包时单独选择，并以 Updream 生产页实际选项为准。H3 资料中的默认短边 ${capabilities.defaultShortSide}px 只作能力参考，不是项目最低限制`);
 
@@ -80,7 +110,20 @@ export async function preflightH3Shot(
         : kind === "video"
           ? `<Video ${counters.video}>`
           : `<Audio ${counters.audio}>`;
-      references.push({ assetId: asset.id, label, kind, filePath: resolved, role: `${asset.type} reference for ${shot.id}` });
+      let role = asset.fileRoles[fileIndex];
+      if (kind === "image") {
+        if (!role) {
+          errors.push(`资产 ${asset.id} 的图片 ${path.basename(resolved)} 没有参考角色，无法确定它约束身份、视角、表情还是服装`);
+          continue;
+        }
+        if (!isReferenceRoleAllowed(asset.type, role)) {
+          errors.push(`资产 ${asset.id} 的图片角色“${role}”不适用于 ${asset.type} 资产`);
+          continue;
+        }
+      } else {
+        role ||= kind === "audio" ? "音频参考" : "动态参考";
+      }
+      references.push({ assetId: asset.id, label, kind, filePath: resolved, role });
     }
   }
   if (counters.image > capabilities.maxReferenceImages) errors.push(`参考图片 ${counters.image} 张，超过 H3 已核实上限 ${capabilities.maxReferenceImages} 张`);

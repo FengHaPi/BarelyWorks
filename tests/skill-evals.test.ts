@@ -16,6 +16,7 @@ describe("core Skill contract EVAL matrix", () => {
       "story-architect": "structure",
       "screenplay-writer": "scenes",
       "asset-bible-builder": "assets",
+      "asset-reference-prompt-writer": "promptZh",
       "shooting-script-director": "shots",
       "storyboard-director": "shots",
       "continuity-supervisor": "checkedShotIds",

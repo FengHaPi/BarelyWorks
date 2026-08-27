@@ -3,6 +3,7 @@ param(
   [Parameter(Mandatory = $true)]
   [string]$ArchivePath,
 
+  [Parameter(Mandatory = $true)]
   [ValidatePattern('^[a-fA-F0-9]{64}$')]
   [string]$ExpectedSha256
 )
@@ -25,7 +26,7 @@ if (-not $targetBin.StartsWith($expectedPrefix, [System.StringComparison]::Ordin
 }
 
 $actualSha256 = (Get-FileHash -LiteralPath $resolvedArchive -Algorithm SHA256).Hash.ToLowerInvariant()
-if ($ExpectedSha256 -and $actualSha256 -ne $ExpectedSha256.ToLowerInvariant()) {
+if ($actualSha256 -ne $ExpectedSha256.ToLowerInvariant()) {
   throw "SHA-256 校验失败。期望 $($ExpectedSha256.ToLowerInvariant())，实际 $actualSha256。未解压、未修改现有工具。"
 }
 

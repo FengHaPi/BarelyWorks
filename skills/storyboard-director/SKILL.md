@@ -10,10 +10,15 @@ Require approved ShotSpec and available logical assets. Design each shot indepen
 ## Workflow
 
 1. Define concrete start frame, end frame, composition, and motion plan for every ShotSpec.
-2. List character, scene, and required asset IDs.
+2. Copy `characterIds` and `sceneId` exactly from the matching approved ShotSpec. `requiredAssetIds` must contain the complete union of that ShotSpec's `characterIds`, `sceneId`, `propIds`, and `styleIds`; never omit a required ID.
 3. Identify direction, eyeline, wardrobe, prop, pose, lighting, and spatial continuity risks.
-4. Keep approval false until the user approves the storyboard.
-5. A single-shot revision must not force unrelated shots to be regenerated.
+4. Verify the matching ShotSpec `physicalPlan` through observable frame geometry. Confirm camera blocking, display geometry, reflection topology, and timed state gates separately in `physicalVerification`.
+5. A normally used single-sided display must visibly face its user; camera readability must come from the declared over-shoulder, side, insert, or reflection geometry. Never reverse the device only to show its screen.
+6. Show normal reflection pairs, mirror-only instances, and real-space instances as distinct presences. When a mirror-only entity proves the effect, retain enough mirror boundary and real-space background to make that distinction observable.
+7. Ensure every delayed state remains visibly absent or stable before its gate and first appears only at or after the declared offset.
+8. Mark a failed physical check as `fail` and explain it. Do not rewrite the ShotSpec or conceal the failure in vague composition language.
+9. Keep approval false until the user approves the storyboard.
+10. A single-shot revision must not force unrelated shots to be regenerated.
 
 Return [the output contract](references/output-contract.md).
 

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { buildRoughCutArgs, detectRequiredEncoders, resolveMediaToolPaths } from "../src/media/media-toolchain";
+import { buildRoughCutArgs, detectRequiredEncoders, displayDimensionsFromProbeStream, resolveMediaToolPaths } from "../src/media/media-toolchain";
 
 describe("FFmpeg rough-cut arguments", () => {
   it("preserves output history and adds silence only for clips without audio", () => {
@@ -51,5 +51,13 @@ describe("FFmpeg rough-cut arguments", () => {
     `);
     expect(detected).toEqual({ libx264Available: true, aacAvailable: true });
     expect(detectRequiredEncoders(" V....D h264_nvenc H.264")).toEqual({ libx264Available: false, aacAvailable: false });
+  });
+
+  it("uses display rotation when reporting mobile-video dimensions", () => {
+    expect(displayDimensionsFromProbeStream({ width: 1920, height: 1080, tags: { rotate: "90" } })).toEqual({ width: 1080, height: 1920 });
+    expect(displayDimensionsFromProbeStream({ width: 1920, height: 1080, side_data_list: [{ rotation: -90 }] })).toEqual({ width: 1080, height: 1920 });
+    expect(displayDimensionsFromProbeStream({ width: 1920, height: 1080, side_data_list: [{ rotation: 180 }] })).toEqual({ width: 1920, height: 1080 });
+    expect(displayDimensionsFromProbeStream({ width: 1920, height: 1080, side_data_list: [{ rotation: 45 }] }))
+      .toEqual(displayDimensionsFromProbeStream({ width: 1920, height: 1080, side_data_list: [{ rotation: -45 }] }));
   });
 });

@@ -5,7 +5,7 @@
   "required": ["mode", "prompt", "referenceLabels", "notes"],
   "properties": {
     "mode": { "type": "string", "enum": ["T2VA", "I2VA", "FL2VA", "L2VA", "Ref2VA"] },
-    "prompt": { "type": "string", "minLength": 20 },
+    "prompt": { "type": "string", "minLength": 20, "maxLength": 7000 },
     "referenceLabels": {
       "type": "array",
       "items": {

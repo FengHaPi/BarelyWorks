@@ -114,7 +114,19 @@ export const assetBibleSchema = z.object({
   });
 });
 
+export const assetReferencePromptOutputSchema = z.object({
+  schemaVersion: z.literal("asset-reference-prompt-v1"),
+  assetId: z.string().regex(/^(CHAR|SCENE|PROP|COSTUME|STYLE|REF)-\d{3}$/),
+  role: z.enum(["主参考", "正面", "侧面", "背面", "表情", "服装", "其他"]),
+  promptZh: z.string().trim().min(80),
+  promptEn: z.string().trim().min(80),
+  negativePrompt: z.string().trim().min(20),
+  compositionNotes: z.array(z.string().trim().min(1)).min(1),
+  continuityLocks: z.array(z.string().trim().min(1)).min(2),
+});
+
 export const shootingScriptSchema = z.object({
+  schemaVersion: z.enum(["shooting-script-v1", "shooting-script-v2"]).default("shooting-script-v1"),
   targetDurationSec: z.number().positive(),
   shots: z.array(shotSpecSchema).min(1),
   validationNotes: z.array(issueSchema),
@@ -140,9 +152,17 @@ export const shootingScriptSchema = z.object({
   if (Math.abs(finalEnd - value.targetDurationSec) > 0.001) {
     context.addIssue({ code: "custom", path: ["targetDurationSec"], message: "镜头总时长与目标时长不一致" });
   }
+  if (value.schemaVersion === "shooting-script-v2") {
+    value.shots.forEach((shot, index) => {
+      if (!shot.physicalPlan) {
+        context.addIssue({ code: "custom", path: ["shots", index, "physicalPlan"], message: "shooting-script-v2 的每个镜头都必须包含结构化 physicalPlan" });
+      }
+    });
+  }
 });
 
 export const storyboardSchema = z.object({
+  schemaVersion: z.enum(["storyboard-v1", "storyboard-v2"]).default("storyboard-v1"),
   shots: z.array(
     z.object({
       shotId: z.string().regex(/^S\d{3}$/),
@@ -154,10 +174,24 @@ export const storyboardSchema = z.object({
       sceneId: z.string().min(1),
       requiredAssetIds: z.array(z.string()),
       continuityRisks: z.array(z.string()),
+      physicalVerification: z.object({
+        cameraBlocking: z.enum(["pass", "fail"]),
+        displayGeometry: z.enum(["pass", "fail", "not-applicable"]),
+        reflectionTopology: z.enum(["pass", "fail", "not-applicable"]),
+        timedStateGates: z.enum(["pass", "fail", "not-applicable"]),
+        notes: z.array(z.string().trim().min(1)),
+      }).nullable().default(null),
       approved: z.boolean(),
     }),
   ).min(1),
   globalContinuityNotes: z.array(z.string()),
+}).superRefine((value, context) => {
+  if (value.schemaVersion !== "storyboard-v2") return;
+  value.shots.forEach((shot, index) => {
+    if (!shot.physicalVerification) {
+      context.addIssue({ code: "custom", path: ["shots", index, "physicalVerification"], message: "storyboard-v2 的每个镜头都必须包含 physicalVerification" });
+    }
+  });
 });
 
 export const continuityReportSchema = z.object({
@@ -177,6 +211,7 @@ export const skillOutputSchemas = {
   "story-architect": storyOutlineSchema,
   "screenplay-writer": screenplaySchema,
   "asset-bible-builder": assetBibleSchema,
+  "asset-reference-prompt-writer": assetReferencePromptOutputSchema,
   "shooting-script-director": shootingScriptSchema,
   "storyboard-director": storyboardSchema,
   "continuity-supervisor": continuityReportSchema,

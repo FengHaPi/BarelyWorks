@@ -9,6 +9,7 @@ export const studioSkillNames = [
   "story-architect",
   "screenplay-writer",
   "asset-bible-builder",
+  "asset-reference-prompt-writer",
   "shooting-script-director",
   "storyboard-director",
   "continuity-supervisor",

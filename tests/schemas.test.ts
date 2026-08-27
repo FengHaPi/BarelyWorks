@@ -1,7 +1,23 @@
 import { describe, expect, it } from "vitest";
+import fs from "node:fs";
+import { H3_PROMPT_PLATFORM_MAX_CHARACTERS, h3PromptOutputSchema } from "../src/shared/handoff-schemas";
 import { createProjectInputSchema, providerCapabilitiesSchema, shotSpecSchema } from "../src/shared/schemas";
 
 describe("shared contracts", () => {
+  it("declares a type for every const in Codex output schemas", () => {
+    const schemaNames = ["shooting-script", "storyboard"];
+    const visit = (value: unknown, path: string): void => {
+      if (!value || typeof value !== "object") return;
+      const node = value as Record<string, unknown>;
+      if (Object.hasOwn(node, "const")) expect(node.type, `${path} const must declare type`).toBeDefined();
+      for (const [key, child] of Object.entries(node)) visit(child, `${path}.${key}`);
+    };
+    for (const name of schemaNames) {
+      const schema = JSON.parse(fs.readFileSync(new URL(`../templates/schemas/${name}.schema.json`, import.meta.url), "utf8")) as unknown;
+      visit(schema, name);
+    }
+  });
+
   it("keeps unverified provider capabilities unknown", () => {
     const result = providerCapabilitiesSchema.parse({
       provider: "minimax",
@@ -58,5 +74,33 @@ describe("shared contracts", () => {
     };
     expect(createProjectInputSchema.safeParse({ ...base, resolution: "854x480" }).success).toBe(true);
     expect(createProjectInputSchema.safeParse({ ...base, resolution: "640x360" }).success).toBe(false);
+  });
+
+  it("rejects malformed aspect ratios and mismatched output orientation", () => {
+    const base = {
+      title: "画幅校验",
+      sourceType: "story",
+      sourceText: "测试",
+      targetDurationSec: 10,
+      videoType: "测试",
+      visualStyle: "",
+      releasePlatform: "",
+      targetAudience: "",
+      allowStorySuggestions: true,
+    };
+    expect(createProjectInputSchema.safeParse({ ...base, aspectRatio: "banana", resolution: "1280x720" }).success).toBe(false);
+    expect(createProjectInputSchema.safeParse({ ...base, aspectRatio: "16:9", resolution: "720x1280" }).success).toBe(false);
+    expect(createProjectInputSchema.safeParse({ ...base, aspectRatio: "9：16", resolution: "720x1280" }).success).toBe(true);
+    expect(createProjectInputSchema.safeParse({ ...base, targetDurationSec: 3, aspectRatio: "16:9", resolution: "1280x720" }).success).toBe(false);
+    expect(createProjectInputSchema.safeParse({ ...base, sourceType: "storyboard", aspectRatio: "16:9", resolution: "1280x720" }).success).toBe(false);
+  });
+
+  it("enforces the MiniMax H3 7000-character platform limit", () => {
+    const prefix = "integrated_multimodal_description:\n[Shot 1] ";
+    const suffix = "\n\noverall_soundscape:\n安静环境声。\n\nnon_diegetic_music:\nN/A";
+    const promptAtLimit = `${prefix}${"中".repeat(H3_PROMPT_PLATFORM_MAX_CHARACTERS - prefix.length - suffix.length)}${suffix}`;
+    expect(promptAtLimit.length).toBe(H3_PROMPT_PLATFORM_MAX_CHARACTERS);
+    expect(h3PromptOutputSchema.safeParse({ mode: "T2VA", prompt: promptAtLimit, referenceLabels: [], notes: [] }).success).toBe(true);
+    expect(h3PromptOutputSchema.safeParse({ mode: "T2VA", prompt: `${promptAtLimit}中`, referenceLabels: [], notes: [] }).success).toBe(false);
   });
 });

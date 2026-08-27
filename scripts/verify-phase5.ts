@@ -72,7 +72,7 @@ try {
       title: "Phase 5 媒体链路验收",
       sourceType: "story",
       sourceText: "用于验证真实视频导回、质检、粗剪和交付。",
-      targetDurationSec: 2,
+      targetDurationSec: 4,
       aspectRatio: "16:9",
       resolution: "1920x1080",
       videoType: "验收短片",
@@ -94,8 +94,8 @@ try {
     projectId: createdProject.id,
     sequence: 1,
     startTimeSec: 0,
-    endTimeSec: 2,
-    durationSec: 2,
+    endTimeSec: 4,
+    durationSec: 4,
     purpose: "验证完整 Phase 5 媒体链路",
     characterIds: [],
     sceneId: "SCENE-TEST",
@@ -103,7 +103,7 @@ try {
     styleIds: [],
     shotSize: "全景",
     camera: { position: "固定机位", movement: "静止", lens: "35mm", composition: "测试图居中" },
-    action: "测试图形连续运动两秒。",
+    action: "测试图形连续运动四秒。",
     dialogue: [{ speakerId: "旁白", text: "工具链端到端验收。", language: "zh-CN" }],
     sound: ["440Hz 测试音"],
     startState: "测试图开始",
@@ -126,8 +126,8 @@ try {
   const sourceVideoPath = path.join(inboxPath, "S001_V01.mp4");
   await run(mediaStatus.ffmpegPath, [
     "-y",
-    "-f", "lavfi", "-i", "testsrc2=size=960x540:rate=24:duration=2",
-    "-f", "lavfi", "-i", "sine=frequency=440:sample_rate=48000:duration=2",
+    "-f", "lavfi", "-i", "testsrc2=size=960x540:rate=24:duration=4",
+    "-f", "lavfi", "-i", "sine=frequency=440:sample_rate=48000:duration=4",
     "-shortest", "-c:v", "libx264", "-pix_fmt", "yuv420p", "-c:a", "aac", sourceVideoPath,
   ]);
 
@@ -161,7 +161,7 @@ try {
         dimension,
         status: "pass",
         note: "Phase 5 临时验收素材检查通过",
-        evidence: "完整检查 00:00.000-00:02.000",
+        evidence: "完整检查 00:00.000-00:04.000",
       })),
       decision: "accepted",
       summary: "临时合成素材用于验证正式导回、审核、粗剪与交付契约。",

@@ -81,11 +81,12 @@ export const qualityReviewInputSchema = z.object({
   }
   const failed = value.dimensions.some((item) => item.status === "fail");
   const notReviewed = value.dimensions.some((item) => item.status === "not-reviewed");
-  if (value.decision === "accepted" && (failed || notReviewed)) {
-    context.addIssue({ code: "custom", path: ["decision"], message: "存在失败或未审核维度时不能判定通过" });
+  const notFullyPassed = value.dimensions.some((item) => item.status !== "pass");
+  if (value.decision === "accepted" && (notFullyPassed || value.conditions.length || value.unverifiedClaims.length)) {
+    context.addIssue({ code: "custom", path: ["decision"], message: "正式通过要求九个维度全部通过，且不得保留条件或未验证声明" });
   }
-  if (value.decision === "conditional-pass" && (failed || !value.conditions.length)) {
-    context.addIssue({ code: "custom", path: ["decision"], message: "有条件通过不能包含失败维度且必须填写条件" });
+  if (value.decision === "conditional-pass" && (failed || notReviewed || !value.conditions.length)) {
+    context.addIssue({ code: "custom", path: ["decision"], message: "有条件通过必须完成全部维度审核、不能包含失败维度，且必须填写待闭环条件" });
   }
   if (["retry-same-model", "revise-prompt-retry", "switch-model"].includes(value.decision) && (!failed || !value.retryInstructions.length)) {
     context.addIssue({ code: "custom", path: ["decision"], message: "重试或换模型必须包含失败维度和重试说明" });
@@ -133,5 +134,10 @@ export const qualityCenterSchema = z.object({
   generations: z.array(importedGenerationSchema),
   reviews: z.array(qualityReviewSchema),
   renders: z.array(renderRecordSchema),
+  gateAudit: z.object({
+    passed: z.boolean(),
+    acceptedShotIds: z.array(z.string().regex(/^S\d{3}$/)),
+    blockers: z.array(z.string().min(1)),
+  }),
 });
 export type QualityCenter = z.infer<typeof qualityCenterSchema>;

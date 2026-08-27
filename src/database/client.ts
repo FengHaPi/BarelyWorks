@@ -3,6 +3,8 @@ import path from "node:path";
 import Database from "better-sqlite3";
 import { drizzle } from "drizzle-orm/better-sqlite3";
 import * as schema from "./schema";
+import { reconcileAgentFirstWorkspace } from "./agent-first-backfill";
+import { runStudioMigrations } from "./migration-runner";
 
 export interface StudioDatabase {
   db: ReturnType<typeof drizzle<typeof schema>>;
@@ -135,6 +137,8 @@ export function createStudioDatabase(runtimeRoot: string): StudioDatabase {
     sqlite.exec("ALTER TABLE projects ADD COLUMN archived_at TEXT");
   }
   sqlite.exec("CREATE INDEX IF NOT EXISTS projects_archive_updated ON projects(archived_at, updated_at DESC)");
+  runStudioMigrations(sqlite);
+  reconcileAgentFirstWorkspace(sqlite);
 
   return {
     db: drizzle(sqlite, { schema }),

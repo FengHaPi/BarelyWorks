@@ -2,15 +2,16 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "type": "object",
   "additionalProperties": false,
-  "required": ["shots", "globalContinuityNotes"],
+  "required": ["schemaVersion", "shots", "globalContinuityNotes"],
   "properties": {
+    "schemaVersion": { "type": "string", "const": "storyboard-v2" },
     "shots": {
       "type": "array",
       "minItems": 1,
       "items": {
         "type": "object",
         "additionalProperties": false,
-        "required": ["shotId", "startFrame", "endFrame", "composition", "motionPlan", "characterIds", "sceneId", "requiredAssetIds", "continuityRisks", "approved"],
+        "required": ["shotId", "startFrame", "endFrame", "composition", "motionPlan", "characterIds", "sceneId", "requiredAssetIds", "continuityRisks", "physicalVerification", "approved"],
         "properties": {
           "shotId": { "type": "string", "pattern": "^S[0-9]{3}$" },
           "startFrame": { "type": "string", "minLength": 1 },
@@ -21,6 +22,18 @@
           "sceneId": { "type": "string", "minLength": 1 },
           "requiredAssetIds": { "type": "array", "items": { "type": "string" } },
           "continuityRisks": { "type": "array", "items": { "type": "string" } },
+          "physicalVerification": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["cameraBlocking", "displayGeometry", "reflectionTopology", "timedStateGates", "notes"],
+            "properties": {
+              "cameraBlocking": { "type": "string", "enum": ["pass", "fail"] },
+              "displayGeometry": { "type": "string", "enum": ["pass", "fail", "not-applicable"] },
+              "reflectionTopology": { "type": "string", "enum": ["pass", "fail", "not-applicable"] },
+              "timedStateGates": { "type": "string", "enum": ["pass", "fail", "not-applicable"] },
+              "notes": { "type": "array", "items": { "type": "string", "minLength": 1 } }
+            }
+          },
           "approved": { "type": "boolean" }
         }
       }

@@ -8,7 +8,7 @@ export const providerSkillNames = ["h3-prompt-writing", "updream-handoff"] as co
 export type ProviderSkillName = (typeof providerSkillNames)[number];
 
 interface LockFile {
-  skills?: Record<string, { commit?: unknown; ref?: unknown; version?: unknown }>;
+  skills?: Record<string, { commit?: unknown; ref?: unknown; version?: unknown; sha256?: unknown }>;
 }
 
 function isInsideOrEqual(parent: string, child: string): boolean {
@@ -81,8 +81,15 @@ export class ProviderSkillRegistry {
       hash.update(contentByPath.get(relativePath) ?? "", "utf8");
       hash.update("\0");
     }
+    const sha256 = hash.digest("hex");
+    if (typeof entry?.sha256 !== "string" || !/^[a-f0-9]{64}$/i.test(entry.sha256)) {
+      throw new Error(`Provider Skill 锁文件缺少有效内容哈希：${name}`);
+    }
+    if (sha256.toLowerCase() !== entry.sha256.toLowerCase()) {
+      throw new Error(`Provider Skill 内容与锁文件不一致：${name}`);
+    }
     return {
-      provenance: { name, version, sha256: hash.digest("hex"), sourceFiles },
+      provenance: { name, version, sha256, sourceFiles },
       description: frontmatter.description,
       instructionText: match[2].trim(),
       references,

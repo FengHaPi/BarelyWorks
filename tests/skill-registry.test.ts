@@ -11,7 +11,7 @@ describe("runtime Skill registry", () => {
     const skills = await registry.loadMany(studioSkillNames);
     expect(skills.map((skill) => skill.provenance.name)).toEqual(studioSkillNames);
     for (const skill of skills) {
-      expect(skill.provenance.version).toBe("0.1.0");
+      expect(skill.provenance.version).toBe("0.2.0");
       expect(skill.provenance.sha256).toMatch(/^[a-f0-9]{64}$/);
       expect(skill.provenance.sourceFiles).toContain("SKILL.md");
       expect(skill.provenance.sourceFiles).toContain("references/output-contract.md");
@@ -41,15 +41,19 @@ describe("runtime Skill registry", () => {
     const skills = await providerRegistry.loadMany(["h3-prompt-writing", "updream-handoff"]);
     expect(skills[0].provenance.version).toMatch(/^main@d21241f0a4b3$/);
     expect(skills[0].provenance.sourceFiles).toEqual(expect.arrayContaining(["references/base-en.txt", "references/ref-en.txt"]));
-    expect(skills[1].provenance.version).toBe("0.1.0");
+    expect(skills[1].provenance.version).toBe("0.1.6");
     const prompt = composeProviderSkillPrompt({
       action: "test H3 prompt",
       schemaVersion: "h3-prompt-v1",
       skills: [skills[0]],
       projectData: { mode: "T2VA", durationSec: 8 },
+      productOverrides: ["prompt 正文使用简体中文，目标不超过 6500 字符，绝对不得超过 7000 字符。"],
     });
     expect(prompt).toContain("integrated_multimodal_description");
     expect(prompt).toContain("subject_definitions");
     expect(prompt).toContain("只输出符合外部 JSON Schema");
+    expect(prompt).toContain("本次产品层覆盖规则");
+    expect(prompt).toContain("正文使用简体中文");
+    expect(prompt.indexOf("本次产品层覆盖规则")).toBeGreaterThan(prompt.lastIndexOf("</skill-package>"));
   });
 });

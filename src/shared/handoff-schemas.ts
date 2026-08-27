@@ -1,5 +1,8 @@
 import { z } from "zod";
 import { assetSchema, projectSchema, shotSpecSchema } from "./schemas";
+import { H3_PROMPT_PLATFORM_MAX_CHARACTERS } from "./h3-prompt-budget";
+
+export { H3_PROMPT_PLATFORM_MAX_CHARACTERS, H3_PROMPT_TARGET_MAX_CHARACTERS, h3PromptTargetCharacters } from "./h3-prompt-budget";
 
 export const h3ModeSchema = z.enum(["T2VA", "I2VA", "FL2VA", "L2VA", "Ref2VA"]);
 export type H3Mode = z.infer<typeof h3ModeSchema>;
@@ -18,7 +21,10 @@ export type H3ReferenceLabel = z.infer<typeof h3ReferenceLabelSchema>;
 
 export const h3PromptOutputSchema = z.object({
   mode: h3ModeSchema,
-  prompt: z.string().trim().min(20),
+  prompt: z.string().trim().min(20).max(
+    H3_PROMPT_PLATFORM_MAX_CHARACTERS,
+    `H3 提示词超过平台上限 ${H3_PROMPT_PLATFORM_MAX_CHARACTERS} 字符，请压缩重复描述后重新生成`,
+  ),
   referenceLabels: z.array(h3ReferenceLabelSchema),
   notes: z.array(z.string()).default([]),
 }).superRefine((value, context) => {
@@ -71,7 +77,23 @@ export const h3PreflightSchema = z.object({
 });
 export type H3Preflight = z.infer<typeof h3PreflightSchema>;
 
+export const handoffRequiredAssetSchema = z.object({
+  assetId: z.string().min(1),
+  name: z.string().min(1),
+  labels: z.array(z.string().regex(/^<(Subject|Picture|Video|Audio) \d+>$/)),
+  kinds: z.array(z.enum(["image", "video", "audio"])),
+  roles: z.array(z.string().min(1)),
+  bootstrapFiles: z.array(z.string().min(1)),
+}).superRefine((value, context) => {
+  const counts = [value.labels.length, value.kinds.length, value.roles.length, value.bootstrapFiles.length];
+  if (new Set(counts).size > 1) {
+    context.addIssue({ code: "custom", message: `素材 ${value.assetId} 的标签、类型、角色和文件映射数量不一致` });
+  }
+});
+export type HandoffRequiredAsset = z.infer<typeof handoffRequiredAssetSchema>;
+
 export const handoffPackageSummarySchema = z.object({
+  id: z.string().min(1).nullable().default(null),
   shotId: z.string().regex(/^S\d{3}$/),
   version: z.number().int().positive(),
   path: z.string().min(1),
@@ -79,7 +101,16 @@ export const handoffPackageSummarySchema = z.object({
   createdAt: z.iso.datetime(),
   mode: h3ModeSchema,
   generationResolution: generationResolutionSchema.default("platform-default"),
+  requestedDurationSec: z.number().positive().nullable(),
+  sourceShotSpecHash: z.string().regex(/^[a-f0-9]{64}$/).nullable(),
+  sourceStoryboardArtifactId: z.uuid().nullable().default(null),
+  promptPolicyVersion: z.string().min(1).nullable(),
+  isStale: z.boolean().default(false),
+  staleReasons: z.array(z.string().min(1)).default([]),
   uploadState: z.enum(["not-uploaded", "uploaded"]),
+  promptCharacterCount: z.number().int().nonnegative(),
+  promptLanguage: z.enum(["zh", "en", "mixed"]),
+  requiredAssets: z.array(handoffRequiredAssetSchema),
 });
 export type HandoffPackageSummary = z.infer<typeof handoffPackageSummarySchema>;
 

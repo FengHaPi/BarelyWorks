@@ -6,11 +6,13 @@
       "path": "skills/h3-prompt-writing",
       "ref": "main",
       "commit": "d21241f0a4b3acbb34c97dae47fa417b7065e438",
+      "sha256": "4ead607434c8ff43ac3d2ca29f60b67dc7882bd7e412c1b8fdb219c82c8f8327",
       "installedAt": "2026-08-25T03:29:27.568Z"
     },
     "updream-handoff": {
       "source": "local",
-      "version": "0.1.0"
+      "version": "0.1.6",
+      "sha256": "115d23b8c8cee8a0a95ea58e3e2e4bc209b7955ef6228d69fe5342c11dd0db1a"
     }
   }
 }
