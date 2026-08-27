@@ -1,7 +1,7 @@
 {
   "name": "ai-video-studio",
   "version": "0.2.0",
-  "description": "Local-first AI video production workflow with guarded stages and structured artifacts",
+  "description": "Local-first, agent-first AI video workflow with versioned artifacts and cumulative verification",
   "author": {
     "name": "Local developer"
   },

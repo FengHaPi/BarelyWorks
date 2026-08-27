@@ -3,7 +3,7 @@
   "version": "0.2.0",
   "private": true,
   "type": "module",
-  "description": "Windows-local AI video production control room",
+  "description": "Windows-local, agent-first AI video production control room",
   "engines": {
     "node": ">=22.12.0"
   },
