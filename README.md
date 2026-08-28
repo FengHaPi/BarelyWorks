@@ -7,11 +7,22 @@
 ![Node.js](https://img.shields.io/badge/Node.js-%3E%3D22.12.0-339933?logo=nodedotjs&logoColor=white)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178c6?logo=typescript&logoColor=white)
 ![License](https://img.shields.io/badge/license-MIT-22c55e)
+[![Build](https://github.com/FengHaPi/BarelyWorks/actions/workflows/verify.yml/badge.svg?branch=main)](https://github.com/FengHaPi/BarelyWorks/actions/workflows/verify.yml)
+[![Release](https://img.shields.io/github/v/release/FengHaPi/BarelyWorks?include_prereleases&label=release)](https://github.com/FengHaPi/BarelyWorks/releases)
+
+> **📦 [查看版本历史与下载源码](https://github.com/FengHaPi/BarelyWorks/releases)**
 
 AI Video Studio 不是一个“输入一句话后全自动花钱生成”的黑盒。它优先解决版本混乱、上游错误向下扩散、人物漂移、镜头断裂、参考图语义丢失和假完成问题：文字阶段由项目内 Skill 驱动真实 Codex 执行，视频阶段默认编译可人工投递的 H3 / Updream 包，付费视频 API 保持关闭。
 
 > [!IMPORTANT]
 > 当前版本为 **v0.2.0 Alpha**。本次原地重构引入独立 Head、版本血缘、真实项目 Agent、可恢复 Operation、问题中心和逐级累计核查；每次进入后续环节都会重新核对适用上游，检查器缺失或失败不会被当作通过。
+
+## 版本与下载
+
+- GitHub Releases 保存公开发布的 **v0.1.0、v0.1.1 和 v0.2.0**，每个版本都固定到独立 Tag 与提交。
+- v0.1.2～v0.1.6 是未单独发布的内部开发构建，相关改动已合并进入 v0.2.0，不作为可下载 Release。
+- 当前 Alpha 版本仅提供源码压缩包，尚未提供 Windows 安装包或便携包；开发者可按下方“快速开始”运行。
+- 发布版本时必须同步更新 package、插件清单、README、CHANGELOG、Tag 与 Release，流程见 [发布检查清单](docs/release-process.md)。
 
 ## 现在能做什么
 
@@ -168,6 +179,7 @@ projects/             本地运行时项目，仅保留 .gitkeep
 ## 文档
 
 - [更新日志](CHANGELOG.md)
+- [发布检查清单](docs/release-process.md)
 - [v0.2.0 发布说明](docs/releases/v0.2.0.md)
 - [Agent-first 原地重构方案与验收](docs/agent-first-refactor-plan.zh-CN.md)
 - [Agent-first 二次核查与修复汇总](docs/agent-first-remediation-audit.zh-CN.md)
@@ -177,6 +189,12 @@ projects/             本地运行时项目，仅保留 .gitkeep
 - [V1 验收状态](docs/v1-acceptance.md)
 - [2026-08-25 全项目代码审查](docs/code-audit-2026-08-25.md)
 - [Updream 能力检查清单](docs/updream-capability-checklist.md)
+
+## 参与贡献与安全报告
+
+- 普通缺陷和功能建议请使用 [Issues](https://github.com/FengHaPi/BarelyWorks/issues)。
+- 提交代码前请阅读 [贡献指南](CONTRIBUTING.md)，并确保 `npm run check` 完整通过。
+- 安全漏洞不要发布为公开 Issue，请按 [安全政策](SECURITY.md) 私密报告。
 
 ## 已知限制
 

@@ -1,0 +1,48 @@
+name: Bug 报告
+description: 报告可复现的软件缺陷
+title: "[Bug] "
+labels:
+  - bug
+body:
+  - type: markdown
+    attributes:
+      value: |
+        安全漏洞请不要在这里公开，请使用 Security Advisories 私密报告。提交日志前请移除 Token、Cookie、私人项目内容和本地路径中的个人信息。
+  - type: input
+    id: version
+    attributes:
+      label: 软件版本
+      placeholder: 例如 v0.2.0
+    validations:
+      required: true
+  - type: input
+    id: environment
+    attributes:
+      label: 运行环境
+      placeholder: Windows 11、Node.js 22.12.0
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: 复现步骤
+      description: 请提供最小且稳定的复现步骤。
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: 预期结果
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: 实际结果
+    validations:
+      required: true
+  - type: textarea
+    id: diagnostics
+    attributes:
+      label: 已脱敏的日志或截图
+      description: 不要包含密钥、Cookie、私人素材或个人信息。
