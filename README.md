@@ -224,4 +224,4 @@ projects/             Local runtime projects; only .gitkeep is tracked
 
 ## License
 
-[MIT](LICENSE) © 2026 Fengjue (风诀)
+[MIT](LICENSE) © 2026 风诀
