@@ -9,8 +9,29 @@ updates:
       time: "09:00"
       timezone: Asia/Shanghai
     open-pull-requests-limit: 5
+    # These majors have already failed the Windows/Node 22 verification.
+    # Revisit them deliberately when the runtime and type-checking baseline move.
+    ignore:
+      - dependency-name: better-sqlite3
+        update-types:
+          - "version-update:semver-major"
+      - dependency-name: "@types/node"
+        update-types:
+          - "version-update:semver-major"
+      - dependency-name: concurrently
+        update-types:
+          - "version-update:semver-major"
+      - dependency-name: typescript
+        update-types:
+          - "version-update:semver-major"
     groups:
       production-dependencies:
         dependency-type: production
+        update-types:
+          - minor
+          - patch
       development-dependencies:
         dependency-type: development
+        update-types:
+          - minor
+          - patch
