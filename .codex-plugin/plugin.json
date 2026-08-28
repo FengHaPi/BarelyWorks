@@ -3,16 +3,19 @@
   "version": "0.2.0",
   "description": "Local-first, agent-first AI video workflow with versioned artifacts and cumulative verification",
   "author": {
-    "name": "Local developer"
+    "name": "风诀"
   },
   "skills": "./skills/",
   "interface": {
     "displayName": "AI Video Studio",
     "shortDescription": "Run guarded local AI video production workflows.",
     "longDescription": "AI Video Studio routes stories, scripts, assets, shots, storyboards, handoffs, reviews, and delivery through a local-first versioned workflow.",
-    "developerName": "Local developer",
+    "developerName": "风诀",
     "category": "Productivity",
-    "capabilities": ["Interactive", "Write"],
+    "capabilities": [
+      "Interactive",
+      "Write"
+    ],
     "defaultPrompt": "Inspect my local AI Video Studio project and route it to the next valid stage."
   }
 }
