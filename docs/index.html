@@ -1,0 +1,197 @@
+<!doctype html>
+<html lang="en" data-lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#0a0b11" />
+    <meta
+      name="description"
+      content="BarelyWorks is a local-first, Agent-first AI video production console for Windows with versioned artifacts, cumulative verification, and human approval gates."
+    />
+    <title>BarelyWorks · AI Video Studio</title>
+    <link rel="stylesheet" href="./pages.css" />
+    <script src="./pages.js" defer></script>
+  </head>
+  <body>
+    <a class="skip-link" href="#main" data-i18n="skip">Skip to content</a>
+
+    <header class="site-header">
+      <div class="shell nav-wrap">
+        <a class="brand" href="#top" aria-label="BarelyWorks home">
+          <span class="brand-mark" aria-hidden="true">BW</span>
+          <span>BarelyWorks</span>
+        </a>
+        <nav class="nav-links" aria-label="Primary navigation">
+          <a href="#principles" data-i18n="navPrinciples">Principles</a>
+          <a href="#workflow" data-i18n="navWorkflow">Workflow</a>
+          <a href="#quickstart" data-i18n="navQuickstart">Quick start</a>
+        </nav>
+        <div class="nav-actions">
+          <div class="language-switch" role="group" aria-label="Language">
+            <button type="button" data-set-lang="en" aria-pressed="true">EN</button>
+            <button type="button" data-set-lang="zh" aria-pressed="false">中文</button>
+          </div>
+          <a class="github-link" href="https://github.com/FengHaPi/BarelyWorks">GitHub ↗</a>
+        </div>
+      </div>
+    </header>
+
+    <main id="main">
+      <section class="hero shell" id="top">
+        <div class="hero-copy">
+          <div class="eyebrow">
+            <span class="status-dot" aria-hidden="true"></span>
+            <span data-i18n="eyebrow">Windows local-first · v0.2.0 Alpha</span>
+          </div>
+          <h1 data-i18n="heroTitle">AI video production that keeps its receipts.</h1>
+          <p class="hero-lead" data-i18n="heroLead">
+            BarelyWorks turns stories into a traceable nine-stage production workflow with versioned artifacts,
+            cumulative verification, auditable Codex runs, and explicit human approval gates.
+          </p>
+          <div class="hero-actions">
+            <a class="button primary" href="https://github.com/FengHaPi/BarelyWorks" data-i18n="viewSource">View source</a>
+            <a class="button secondary" href="https://github.com/FengHaPi/BarelyWorks/releases" data-i18n="browseReleases">Browse releases</a>
+          </div>
+          <p class="hero-note" data-i18n="heroNote">
+            Paid video APIs stay disabled by default. External generation remains a deliberate human action.
+          </p>
+        </div>
+
+        <div class="evidence-panel" aria-label="Verification summary">
+          <div class="panel-head">
+            <span data-i18n="evidenceLabel">Release evidence</span>
+            <span class="live-pill" data-i18n="verified">Verified</span>
+          </div>
+          <div class="metric-grid">
+            <div class="metric"><strong>154</strong><span data-i18n="serverTests">server tests</span></div>
+            <div class="metric"><strong>47</strong><span data-i18n="uiTests">UI tests</span></div>
+            <div class="metric"><strong>1</strong><span data-i18n="browserE2E">browser E2E</span></div>
+            <div class="metric"><strong>3</strong><span data-i18n="publicReleases">public releases</span></div>
+          </div>
+          <div class="audit-list">
+            <div><span class="check">✓</span><span data-i18n="auditVersion">Version consistency gate</span></div>
+            <div><span class="check">✓</span><span data-i18n="auditCodeql">CodeQL and dependency scanning</span></div>
+            <div><span class="check">✓</span><span data-i18n="auditMedia">H.264/AAC synthetic-media verification</span></div>
+            <div><span class="check">✓</span><span data-i18n="auditHistory">Independent tags and release history</span></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section shell" id="principles">
+        <div class="section-heading">
+          <p class="kicker" data-i18n="principlesKicker">Designed against silent failure</p>
+          <h2 data-i18n="principlesTitle">The workflow stays inspectable before generation gets expensive.</h2>
+          <p data-i18n="principlesLead">
+            BarelyWorks makes upstream mistakes, missing evidence, stale handoffs, and provider failures visible instead of reporting a false pass.
+          </p>
+        </div>
+        <div class="card-grid">
+          <article class="feature-card">
+            <span class="card-index">01</span>
+            <h3 data-i18n="cardVersionTitle">Versioned artifacts</h3>
+            <p data-i18n="cardVersionBody">New revisions never silently replace the active Head, provenance, or approval history.</p>
+          </article>
+          <article class="feature-card">
+            <span class="card-index">02</span>
+            <h3 data-i18n="cardVerifyTitle">Cumulative verification</h3>
+            <p data-i18n="cardVerifyBody">Later stages recheck every applicable upstream artifact, contract, hash, and approval.</p>
+          </article>
+          <article class="feature-card">
+            <span class="card-index">03</span>
+            <h3 data-i18n="cardHumanTitle">Human approval gates</h3>
+            <p data-i18n="cardHumanBody">Approval, provider submission, rough cuts, and final delivery require explicit actions.</p>
+          </article>
+          <article class="feature-card">
+            <span class="card-index">04</span>
+            <h3 data-i18n="cardLocalTitle">Local-first boundaries</h3>
+            <p data-i18n="cardLocalBody">Source material, SQLite data, references, media, deliveries, and logs stay outside Git.</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="section workflow-section" id="workflow">
+        <div class="shell">
+          <div class="section-heading compact">
+            <p class="kicker" data-i18n="workflowKicker">Nine-stage production</p>
+            <h2 data-i18n="workflowTitle">Revise any artifact. Revalidate everything downstream.</h2>
+          </div>
+          <ol class="workflow-grid">
+            <li><span>01</span><strong data-i18n="stage1">Source input</strong></li>
+            <li><span>02</span><strong data-i18n="stage2">Story outline</strong></li>
+            <li><span>03</span><strong data-i18n="stage3">Screenplay</strong></li>
+            <li><span>04</span><strong data-i18n="stage4">Asset definitions</strong></li>
+            <li><span>05</span><strong data-i18n="stage5">Shooting script</strong></li>
+            <li><span>06</span><strong data-i18n="stage6">Storyboard</strong></li>
+            <li><span>07</span><strong data-i18n="stage7">Video generation</strong></li>
+            <li><span>08</span><strong data-i18n="stage8">Quality review</strong></li>
+            <li><span>09</span><strong data-i18n="stage9">Edit & export</strong></li>
+          </ol>
+        </div>
+      </section>
+
+      <section class="section shell split-section" id="quickstart">
+        <div class="section-heading compact">
+          <p class="kicker" data-i18n="quickKicker">Quick start</p>
+          <h2 data-i18n="quickTitle">Run the current Alpha locally.</h2>
+          <p data-i18n="quickLead">Requires Windows 10/11, Node.js 22.12+, npm, and a working Codex CLI. FFmpeg is needed for media stages.</p>
+          <div class="requirements">
+            <span>Windows 10/11</span><span>Node.js ≥ 22.12</span><span>Codex CLI</span><span>FFmpeg</span>
+          </div>
+        </div>
+        <div class="code-card">
+          <div class="code-head"><span>PowerShell</span><button type="button" data-copy-code data-i18n="copy">Copy</button></div>
+          <pre><code>git clone https://github.com/FengHaPi/BarelyWorks.git
+cd BarelyWorks
+npm install
+npm run dev</code></pre>
+          <div class="local-addresses"><span>UI · 127.0.0.1:5173</span><span>API · 127.0.0.1:4317</span></div>
+        </div>
+      </section>
+
+      <section class="section shell release-section">
+        <div class="release-copy">
+          <p class="kicker" data-i18n="releaseKicker">Preserved release history</p>
+          <h2 data-i18n="releaseTitle">Three public releases, three immutable checkpoints.</h2>
+          <p data-i18n="releaseLead">Internal builds v0.1.2–v0.1.6 were consolidated into v0.2.0 and are clearly identified as unpublished development builds.</p>
+        </div>
+        <div class="release-track" aria-label="Release history">
+          <a href="https://github.com/FengHaPi/BarelyWorks/releases/tag/v0.1.0"><strong>v0.1.0</strong><span data-i18n="releaseOne">Auditable foundation</span></a>
+          <a href="https://github.com/FengHaPi/BarelyWorks/releases/tag/v0.1.1"><strong>v0.1.1</strong><span data-i18n="releaseTwo">Local media pipeline</span></a>
+          <a class="current" href="https://github.com/FengHaPi/BarelyWorks/releases/tag/v0.2.0"><strong>v0.2.0</strong><span data-i18n="releaseThree">Agent-first verification</span></a>
+        </div>
+      </section>
+
+      <section class="section shell maintainer-section">
+        <div>
+          <p class="kicker" data-i18n="maintainerKicker">Built for real maintenance work</p>
+          <h2 data-i18n="maintainerTitle">Automation is useful only when its evidence survives review.</h2>
+        </div>
+        <p data-i18n="maintainerBody">
+          The repository includes release consistency checks, Windows CI, browser E2E, CodeQL, Dependabot, contribution templates, private vulnerability reporting, and documented release procedures.
+        </p>
+      </section>
+
+      <section class="cta-section">
+        <div class="shell cta-inner">
+          <div>
+            <p class="kicker" data-i18n="ctaKicker">Open-source Alpha</p>
+            <h2 data-i18n="ctaTitle">Inspect the workflow, test the gates, and help make AI video production less fragile.</h2>
+          </div>
+          <div class="hero-actions">
+            <a class="button primary" href="https://github.com/FengHaPi/BarelyWorks" data-i18n="openGithub">Open on GitHub</a>
+            <a class="button secondary" href="https://github.com/FengHaPi/BarelyWorks/issues" data-i18n="reportIssue">Report an issue</a>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="shell footer-inner">
+        <span>MIT © 2026 风诀</span>
+        <span data-i18n="footerNote">Local-first by design. Human-controlled by default.</span>
+      </div>
+    </footer>
+
+    <noscript>This page needs JavaScript only for the in-place language switch. All project links remain available.</noscript>
+  </body>
+</html>
