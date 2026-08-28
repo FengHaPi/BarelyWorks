@@ -4,6 +4,16 @@
   "private": true,
   "type": "module",
   "description": "Windows-local, agent-first AI video production control room",
+  "author": "风诀",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/FengHaPi/BarelyWorks.git"
+  },
+  "bugs": {
+    "url": "https://github.com/FengHaPi/BarelyWorks/issues"
+  },
+  "homepage": "https://github.com/FengHaPi/BarelyWorks#readme",
   "engines": {
     "node": ">=22.12.0"
   },
@@ -23,7 +33,8 @@
     "test:server": "vitest run --config vitest.config.ts",
     "test:ui": "vitest run --config ui/vitest.config.ts",
     "test:e2e": "npm run build:ui && playwright test",
-    "check": "npm run typecheck && npm run test && npm run build && npm run test:e2e"
+    "check": "npm run check:version && npm run typecheck && npm run test && npm run build && npm run test:e2e",
+    "check:version": "node scripts/check-version-consistency.mjs"
   },
   "dependencies": {
     "@fastify/cors": "^11.1.0",
