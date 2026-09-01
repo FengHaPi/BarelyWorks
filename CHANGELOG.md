@@ -6,6 +6,15 @@
 
 ## [Unreleased]
 
+### Workflow V3 可审计核心
+
+- 新增独立于旧 SQLite、全局阶段状态和自动修复链路的 `workflow-v3` 控制面。
+- Artifact、Verification、人工 Approval、Adoption history 与 current projection 均按精确 ID 和内容哈希建立不可变证据。
+- 新增稳定 `shotUid`、确定性 Verification、fail-closed Production Gate 与确定性 Generation Package。
+- 新增非 Live 最小链路、Approval/Adoption/history、isolation 和 failure/chaos 测试；真实模型测试保持显式 opt-in。
+- 新增 Workflow V3 架构、脱敏 Live E2E 摘要和发布 Manifest；原始 Provider 日志、线程/运行标识和本机路径不进入公开仓库。
+
+
 ## [0.2.0] - 2026-08-28
 
 ### Agent-first 原地重构
