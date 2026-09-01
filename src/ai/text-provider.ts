@@ -9,6 +9,7 @@ import type {
   storyOutlineSchema,
 } from "../shared/skill-schemas";
 import type { H3Mode, H3PromptOutput, H3ReferenceLabel } from "../shared/handoff-schemas";
+import type { ExplicitShotTopology } from "../shared/explicit-shot-topology";
 import type { Asset, Project, ShotSpec } from "../shared/schemas";
 import type { SkillProvenance } from "../skills/skill-registry";
 
@@ -54,6 +55,7 @@ export interface AssetBibleGenerationInput {
   approvedScreenplay: Screenplay | string;
   approvedScreenplayRef: string;
   sourceText: string;
+  explicitShotTopology?: ExplicitShotTopology | null;
   designMode: AssetDesignMode;
   operation?: ProviderOperationContext;
 }
@@ -89,6 +91,7 @@ export interface ShootingScriptGenerationInput {
     maxCameraPhasesPerShot: 3;
     maxTimedStateGatesPerShot: 6;
     maxHighRiskLayersPerShot: 2;
+    explicitShotTopology?: ExplicitShotTopology | null;
   };
   correctionFeedback?: string[];
   operation?: ProviderOperationContext;

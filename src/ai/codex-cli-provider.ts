@@ -385,10 +385,15 @@ export class CodexCliProvider implements TextIntelligenceProvider {
   async generateAssetBible(input: AssetBibleGenerationInput): Promise<TextGenerationResult<AssetBible>> {
     const skills = await this.skillRegistry.loadMany(ASSET_BIBLE_ROUTE);
     const schemaVersion = "asset-bible-builder-v1";
+    const explicitShotTopology = input.explicitShotTopology ?? null;
+    const designAction = input.designMode === "original-proposal"
+      ? "从已批准影视剧本建立可直接进入美术制作的完整资产设计草案，使用稳定 ID，停在 ASSET_BIBLE_REVIEW。项目 aspectRatio 是不可改写的硬参数，风格与场景资产不得声明其他画幅。缺失的可视信息必须作为明确的原创设计提案补齐并标记 creative-proposal；不得用 A/B/C 占位符或‘尚未确定’代替人物造型。不要声称图片文件或上传状态已经存在。"
+      : "从已批准影视剧本提取忠于已有文本和参考资料的资产定义，使用稳定 ID，停在 ASSET_BIBLE_REVIEW。项目 aspectRatio 是不可改写的硬参数，风格与场景资产不得声明其他画幅。没有依据的视觉信息不得臆造，相关资产标记 productionReady=false，等待用户上传参考图或补充设定。不要声称图片文件或上传状态已经存在。";
+    const topologyAction = explicitShotTopology
+      ? "原始 source 已明确锁定 production shot 数量、ID 与时间范围；Asset Bible 只能保留该显式拓扑，不得另造、重分段或迁移事件。"
+      : "Asset Bible 不得预测未来 production shot 的数量、ID、时长或切点。";
     const prompt = composeSkillPrompt({
-      action: input.designMode === "original-proposal"
-        ? "从已批准影视剧本建立可直接进入美术制作的完整资产设计草案，使用稳定 ID，停在 ASSET_BIBLE_REVIEW。项目 aspectRatio 是不可改写的硬参数，风格与场景资产不得声明其他画幅。缺失的可视信息必须作为明确的原创设计提案补齐并标记 creative-proposal；不得用 A/B/C 占位符或‘尚未确定’代替人物造型。不要声称图片文件或上传状态已经存在。"
-        : "从已批准影视剧本提取忠于已有文本和参考资料的资产定义，使用稳定 ID，停在 ASSET_BIBLE_REVIEW。项目 aspectRatio 是不可改写的硬参数，风格与场景资产不得声明其他画幅。没有依据的视觉信息不得臆造，相关资产标记 productionReady=false，等待用户上传参考图或补充设定。不要声称图片文件或上传状态已经存在。",
+      action: `${designAction}${topologyAction}`,
       schemaVersion,
       skills,
       projectData: {
@@ -401,6 +406,7 @@ export class CodexCliProvider implements TextIntelligenceProvider {
           allowStorySuggestions: input.project.allowStorySuggestions,
         },
         designMode: input.designMode,
+        explicitShotTopology,
         designRequirements: {
           visualAssetsNeedProductionReadyDecision: true,
           characterFields: ["fixed palette", "face and hair or headwear", "body proportions", "costume", "signature features", "performance traits", "negative constraints"],
@@ -463,8 +469,12 @@ export class CodexCliProvider implements TextIntelligenceProvider {
   async generateShootingScript(input: ShootingScriptGenerationInput): Promise<TextGenerationResult<ShootingScript>> {
     const skills = await this.skillRegistry.loadMany(SHOOTING_SCRIPT_ROUTE);
     const schemaVersion = "shooting-script-director-v2";
+    const explicitShotTopology = input.generationConstraints.explicitShotTopology ?? null;
+    const shotCountInstruction = explicitShotTopology
+      ? `generationConstraints.explicitShotTopology 是原始 source 的显式硬约束；必须逐项复制 ${explicitShotTopology.shots.length} 个镜头的 ID、顺序、startTimeSec、endTimeSec 与 durationSec，不得增加、合并、删减或改切点。`
+      : "镜头数量不得少于 recommendedMinimumShots。";
     const prompt = composeSkillPrompt({
-      action: `依据已批准剧本和资产定义生成 shooting-script-v2 的连续、完整时间码 ShotSpec，停在 SHOOTING_SCRIPT_REVIEW。每个 ShotSpec 会作为一个独立视频生成任务，必须满足本次已核实的时长约束；durationSec 必须是整数、必须至少为 durationMinSec，startTimeSec 与 endTimeSec 也必须按整数秒连续衔接，全部镜头时长之和必须精确等于项目目标时长，严禁生成 7.5 这类小数秒。镜头数量不得少于 recommendedMinimumShots。采用内容驱动的最长可行片段策略，但“最长”必须服从付费生成执行预算：每镜头最多 4 个主要可见剧情 Beat、3 段运镜、6 个精确事件门、2 层高风险生成任务。屏幕内容、复杂镜面、反常直连空间、多复制体群体分别算一层；超过两层必须在真实揭示转折处拆为相邻镜头，即使场景与人物连续。长镜头不能以塞入更多事件为代价。在预算内优先减少跨任务的色彩、曝光和人物一致性漂移；超出预算时，模型可执行性优先于单片段长度。不得为了拉长片段加入空等、重复动作、无意义停顿或与剧情无关的内容。每个镜头必须填写 physicalPlan：先建立现实、屏幕内、仅反射存在的实例；再声明 cameraContinuityMode 和 spaceTopology，列出摄影机可能所在的每个空间及真实可穿越边界；随后每段 cameraSegments 都必须填写 spaceId、positionAnchor、lookAt、transitionFromPrevious、boundaryId，并为第一段之后的连续移动或边界穿越填写可执行 transitionPath。第一段必须 initial；single-take 禁止 cut；摄影机改变 spaceId 时必须通过匹配且可通行的 boundary-crossing，不能一会在电梯外一会在电梯内却没有门槛穿越，也不能用一句“横移”让摄影机瞬移到同一空间另一侧。再分段锁定摄影机视点、身体/头部/视线朝向、显示面朝向和可读方式、正常镜像与异常镜面实体数量，以及真正不可提前的关键事件。只为当前机位可见或可听的内容建立细节；不可读屏时不得安排压缩块、断字等不可见视觉任务。群体限定约 8–12 个，并只执行一个统一动作；狭窄空间运镜优先“跟入/建立—一次横移或定机—结尾一次轻微移动”，不得设计来回环绕和厘米级修正。普通使用单面手机时，屏幕默认朝使用者；摄影机若必须读屏，只能使用可执行的越肩、侧角、插入镜头或反射机位。任何要求若在同一机位下物理冲突，必须先调整调度或拆镜。声音必须形成一条无重叠矛盾的时间线；同一声音不能既持续到较晚时刻又在此前抽空。action、startState、endState 和 camera 必须与 physicalPlan 完全一致。返回前必须逐镜头检查遮挡因果、摄影机空间路径与相邻边界状态。${input.correctionFeedback?.length ? `这是内部重试，上一候选被确定性预检拒绝；必须逐条消除以下问题后再返回：${input.correctionFeedback.join("；")}` : ""}`,
+      action: `依据已批准剧本和资产定义生成 shooting-script-v2 的连续、完整时间码 ShotSpec，停在 SHOOTING_SCRIPT_REVIEW。每个 ShotSpec 会作为一个独立视频生成任务，必须满足本次已核实的时长约束；durationSec 必须是整数、必须至少为 durationMinSec，startTimeSec 与 endTimeSec 也必须按整数秒连续衔接，全部镜头时长之和必须精确等于项目目标时长，严禁生成 7.5 这类小数秒。${shotCountInstruction}采用内容驱动的最长可行片段策略，但“最长”必须服从付费生成执行预算：每镜头最多 4 个主要可见剧情 Beat、3 段运镜、6 个精确事件门、2 层高风险生成任务。屏幕内容、复杂镜面、反常直连空间、多复制体群体分别算一层；超过两层必须在真实揭示转折处拆为相邻镜头，即使场景与人物连续。长镜头不能以塞入更多事件为代价。在预算内优先减少跨任务的色彩、曝光和人物一致性漂移；超出预算时，模型可执行性优先于单片段长度。不得为了拉长片段加入空等、重复动作、无意义停顿或与剧情无关的内容。每个镜头必须填写 physicalPlan：先建立现实、屏幕内、仅反射存在的实例；再声明 cameraContinuityMode 和 spaceTopology，列出摄影机可能所在的每个空间及真实可穿越边界；随后每段 cameraSegments 都必须填写 spaceId、positionAnchor、lookAt、transitionFromPrevious、boundaryId，并为第一段之后的连续移动或边界穿越填写可执行 transitionPath。第一段必须 initial；single-take 禁止 cut；摄影机改变 spaceId 时必须通过匹配且可通行的 boundary-crossing，不能一会在电梯外一会在电梯内却没有门槛穿越，也不能用一句“横移”让摄影机瞬移到同一空间另一侧。再分段锁定摄影机视点、身体/头部/视线朝向、显示面朝向和可读方式、正常镜像与异常镜面实体数量，以及真正不可提前的关键事件。只为当前机位可见或可听的内容建立细节；不可读屏时不得安排压缩块、断字等不可见视觉任务。群体限定约 8–12 个，并只执行一个统一动作；狭窄空间运镜优先“跟入/建立—一次横移或定机—结尾一次轻微移动”，不得设计来回环绕和厘米级修正。普通使用单面手机时，屏幕默认朝使用者；摄影机若必须读屏，只能使用可执行的越肩、侧角、插入镜头或反射机位。任何要求若在同一机位下物理冲突，必须先调整调度或拆镜。声音必须形成一条无重叠矛盾的时间线；同一声音不能既持续到较晚时刻又在此前抽空。action、startState、endState 和 camera 必须与 physicalPlan 完全一致。返回前必须逐镜头检查遮挡因果、摄影机空间路径与相邻边界状态。${input.correctionFeedback?.length ? `这是内部重试，上一候选被确定性预检拒绝；必须逐条消除以下问题后再返回：${input.correctionFeedback.join("；")}` : ""}`,
       schemaVersion,
       skills,
       projectData: {
