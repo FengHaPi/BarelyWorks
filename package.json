@@ -31,6 +31,8 @@
     "typecheck": "tsc --noEmit",
     "test": "npm run test:server && npm run test:ui",
     "test:server": "vitest run --config vitest.config.ts",
+    "test:workflow-v3": "vitest run --config vitest.config.ts tests/workflow-v3-minimal-chain-001.test.ts tests/workflow-v3-approval-adoption.test.ts tests/workflow-v3-adoption-history.test.ts tests/workflow-v3-failure-chaos.test.ts tests/workflow-v3-isolation.test.ts",
+    "test:workflow-v3:live": "vitest run --config vitest.workflow-v3-live.config.ts",
     "test:ui": "vitest run --config ui/vitest.config.ts",
     "test:e2e": "npm run build:ui && playwright test",
     "check": "npm run check:version && npm run typecheck && npm run test && npm run build && npm run test:e2e",

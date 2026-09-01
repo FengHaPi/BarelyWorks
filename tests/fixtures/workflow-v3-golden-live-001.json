@@ -1,0 +1,1843 @@
+{
+  "schemaVersion": "workflow-v3-golden-baseline-v1",
+  "sourceLiveRunId": "sanitized-real-model-e2e",
+  "sourceResultHash": "31f690317ddba4a28360f4798c59d7150dc208cb1c09bba0fbcf1139b72a5989",
+  "artifacts": [
+    {
+      "schemaVersion": "workflow-v3-artifact-v1",
+      "artifactId": "a961555f-1e59-4684-b7a2-96a9e26e24a1",
+      "projectId": "30000000-0000-4000-8000-000000000001",
+      "kind": "source",
+      "version": 1,
+      "ordinal": 1,
+      "parentArtifactId": null,
+      "inputArtifactIds": [],
+      "contentHash": "54411e93e44555258a2f630948a9c7b438559b572bccc466f6240b2a4475c918",
+      "payload": {
+        "content": {
+          "text": "成片总时长必须为15秒。\n必须恰好使用2个生产镜头：S001 0-7秒，S002 7-15秒。\n雨夜，一个独自回家的年轻人走进旧公寓电梯。\nS001中他进入空电梯，门关闭后发现镜中的自己慢半拍。\nS002中电梯灯闪烁，镜中人没有跟随他回头，而是直视镜外；电梯到站开门，现实中的他立刻退出。\n不要增加其他人物、地点或支线。"
+        },
+        "trace": {
+          "provider": "workflow-v3",
+          "runId": "source-intake",
+          "completedAt": "2026-08-31T07:13:40.577Z"
+        }
+      },
+      "createdAt": "2026-08-31T07:13:40.586Z",
+      "inputArtifactRefs": []
+    },
+    {
+      "schemaVersion": "workflow-v3-artifact-v1",
+      "artifactId": "497b4460-2c52-4ac1-b458-c56bada3a5a5",
+      "projectId": "30000000-0000-4000-8000-000000000001",
+      "kind": "outline",
+      "version": 1,
+      "ordinal": 2,
+      "parentArtifactId": null,
+      "inputArtifactIds": [
+        "a961555f-1e59-4684-b7a2-96a9e26e24a1"
+      ],
+      "contentHash": "bb4797f7dcd26b9a1b18b2658ed840a2e55d8fcf2efa65d08c20a4a804619b66",
+      "payload": {
+        "content": {
+          "title": "最小链路测试-001：镜中慢拍",
+          "logline": "雨夜，独自回家的年轻人进入旧公寓电梯，却发现镜中的自己逐渐脱离现实动作；当电梯门再次开启，他立即逃离这场异常。",
+          "beats": [
+            {
+              "beatId": "B001",
+              "summary": "S001｜镜像慢半拍（0—7秒）：建立孤立、封闭的日常环境，并用轻微但明确的镜像延迟触发异常。；雨夜，独自回家的年轻人走进旧公寓的空电梯。；电梯门在他身后关闭。；他发现镜中的自己比现实动作慢半拍。"
+            },
+            {
+              "beatId": "B002",
+              "summary": "S002｜镜中人凝视镜外（7—15秒）：让镜像异常从动作延迟升级为自主凝视，并以年轻人立即退出电梯完成惊悚落点。；电梯灯开始闪烁。；现实中的年轻人回头，但镜中人没有跟随他回头。；镜中人保持原位，直视镜外。；电梯到站并开门。；现实中的年轻人立刻退出电梯。"
+            }
+          ]
+        },
+        "providerPayload": {
+          "title": "最小链路测试-001：镜中慢拍",
+          "logline": "雨夜，独自回家的年轻人进入旧公寓电梯，却发现镜中的自己逐渐脱离现实动作；当电梯门再次开启，他立即逃离这场异常。",
+          "themes": [
+            "镜像自我的异化",
+            "封闭空间中的克制惊悚",
+            "面对异常时的本能逃生"
+          ],
+          "targetDurationSec": 15,
+          "structure": [
+            {
+              "sequence": 1,
+              "heading": "S001｜镜像慢半拍（0—7秒）",
+              "purpose": "建立孤立、封闭的日常环境，并用轻微但明确的镜像延迟触发异常。",
+              "events": [
+                "雨夜，独自回家的年轻人走进旧公寓的空电梯。",
+                "电梯门在他身后关闭。",
+                "他发现镜中的自己比现实动作慢半拍。"
+              ],
+              "estimatedDurationSec": 7
+            },
+            {
+              "sequence": 2,
+              "heading": "S002｜镜中人凝视镜外（7—15秒）",
+              "purpose": "让镜像异常从动作延迟升级为自主凝视，并以年轻人立即退出电梯完成惊悚落点。",
+              "events": [
+                "电梯灯开始闪烁。",
+                "现实中的年轻人回头，但镜中人没有跟随他回头。",
+                "镜中人保持原位，直视镜外。",
+                "电梯到站并开门。",
+                "现实中的年轻人立刻退出电梯。"
+              ],
+              "estimatedDurationSec": 8
+            }
+          ],
+          "lockedFacts": [
+            "成片总时长必须为15秒。",
+            "必须恰好使用2个生产镜头。",
+            "S001固定为0—7秒，S002固定为7—15秒。",
+            "故事发生在雨夜的旧公寓电梯内。",
+            "主角是一个独自回家的年轻人。",
+            "S001中电梯为空，主角进入后门关闭，并发现镜中的自己慢半拍。",
+            "S002中电梯灯闪烁；主角回头时，镜中人不跟随回头，而是直视镜外。",
+            "电梯到站开门后，现实中的主角立刻退出。",
+            "不得增加其他人物、地点或支线。",
+            "视觉风格为克制的电影感写实风格。"
+          ],
+          "proposedChanges": [],
+          "approvalNotes": [
+            "当前草案严格保留15秒总时长、2个生产镜头及各镜头时间边界。",
+            "请在OUTLINE_REVIEW阶段人工确认剧情大纲；获批前不得进入剧本、分镜提示词或媒体生成阶段。"
+          ]
+        },
+        "trace": {
+          "provider": "codex-cli",
+          "model": "gpt-5.6-sol",
+          "runId": "redacted-live-outline",
+          "threadId": null,
+          "usage": {
+            "input_tokens": 23390,
+            "cached_input_tokens": 0,
+            "cache_write_input_tokens": 0,
+            "output_tokens": 857,
+            "reasoning_output_tokens": 285
+          },
+          "eventTypes": [
+            "thread.started",
+            "item.completed",
+            "turn.started",
+            "item.completed",
+            "turn.completed"
+          ],
+          "schemaVersion": "story-architect-v1",
+          "route": [
+            "ai-video-producer",
+            "story-architect"
+          ],
+          "completedAt": "2026-08-31T07:14:01.919Z"
+        }
+      },
+      "createdAt": "2026-08-31T07:14:01.925Z",
+      "inputArtifactRefs": [
+        {
+          "artifactId": "a961555f-1e59-4684-b7a2-96a9e26e24a1",
+          "contentHash": "54411e93e44555258a2f630948a9c7b438559b572bccc466f6240b2a4475c918"
+        }
+      ]
+    },
+    {
+      "schemaVersion": "workflow-v3-artifact-v1",
+      "artifactId": "acfd6eea-0d47-45a0-ac1e-f5dfad37becf",
+      "projectId": "30000000-0000-4000-8000-000000000001",
+      "kind": "screenplay",
+      "version": 1,
+      "ordinal": 3,
+      "parentArtifactId": null,
+      "inputArtifactIds": [
+        "a961555f-1e59-4684-b7a2-96a9e26e24a1",
+        "497b4460-2c52-4ac1-b458-c56bada3a5a5"
+      ],
+      "contentHash": "8379aa3216cccefc406241b26c99046e2b71a1610731de0ceacbf07006805e7c",
+      "payload": {
+        "content": {
+          "title": "最小链路测试-001：镜中慢拍｜影视剧本草案",
+          "scenes": [
+            {
+              "sceneId": "SCENE-001",
+              "heading": "S001｜镜像慢半拍（0—7秒）",
+              "action": [
+                "0—2秒：一名独自回家的年轻人带着雨夜的湿气走进空无一人的旧公寓电梯。",
+                "2—4秒：电梯门在年轻人身后缓缓闭合，将他封闭在狭窄、陈旧的轿厢内。",
+                "4—7秒：年轻人抬手整理被雨水打湿的衣领；镜中的他隔了半拍才做出相同动作。年轻人的手停住，目光锁定镜面。"
+              ],
+              "beatIds": [
+                "B001"
+              ]
+            },
+            {
+              "sceneId": "SCENE-002",
+              "heading": "S002｜镜中人凝视镜外（7—15秒）",
+              "action": [
+                "7—9秒：电梯灯开始间歇闪烁，明暗交替掠过年轻人与镜中的倒影。",
+                "9—12秒：年轻人猛然回头望向身后；镜中人没有跟随回头，仍保持原位，越过镜面直视镜外。",
+                "12—13秒：年轻人僵住，与镜中人短暂对视。",
+                "13—15秒：电梯到站，门打开。现实中的年轻人立即冲出电梯；镜中人的凝视留在门开启前最后可见的镜面中。"
+              ],
+              "beatIds": [
+                "B002"
+              ]
+            }
+          ]
+        },
+        "providerPayload": {
+          "title": "最小链路测试-001：镜中慢拍｜影视剧本草案",
+          "version": 1,
+          "basedOnApprovedArtifact": "workflow-v3:outline:497b4460-2c52-4ac1-b458-c56bada3a5a5:688eaf93621b57bea204b58f0dfef4b0e943457fd5e04fec14a091ffeb5b3544",
+          "sourcePreserved": true,
+          "scenes": [
+            {
+              "sequence": 1,
+              "heading": "S001｜镜像慢半拍（0—7秒）",
+              "location": "旧公寓电梯内",
+              "timeOfDay": "雨夜",
+              "action": [
+                "0—2秒：一名独自回家的年轻人带着雨夜的湿气走进空无一人的旧公寓电梯。",
+                "2—4秒：电梯门在年轻人身后缓缓闭合，将他封闭在狭窄、陈旧的轿厢内。",
+                "4—7秒：年轻人抬手整理被雨水打湿的衣领；镜中的他隔了半拍才做出相同动作。年轻人的手停住，目光锁定镜面。"
+              ],
+              "dialogue": []
+            },
+            {
+              "sequence": 2,
+              "heading": "S002｜镜中人凝视镜外（7—15秒）",
+              "location": "旧公寓电梯内",
+              "timeOfDay": "雨夜",
+              "action": [
+                "7—9秒：电梯灯开始间歇闪烁，明暗交替掠过年轻人与镜中的倒影。",
+                "9—12秒：年轻人猛然回头望向身后；镜中人没有跟随回头，仍保持原位，越过镜面直视镜外。",
+                "12—13秒：年轻人僵住，与镜中人短暂对视。",
+                "13—15秒：电梯到站，门打开。现实中的年轻人立即冲出电梯；镜中人的凝视留在门开启前最后可见的镜面中。"
+              ],
+              "dialogue": []
+            }
+          ],
+          "unresolvedQuestions": []
+        },
+        "trace": {
+          "provider": "codex-cli",
+          "model": "gpt-5.6-sol",
+          "runId": "redacted-live-screenplay",
+          "threadId": null,
+          "usage": {
+            "input_tokens": 21944,
+            "cached_input_tokens": 0,
+            "cache_write_input_tokens": 0,
+            "output_tokens": 673,
+            "reasoning_output_tokens": 208
+          },
+          "eventTypes": [
+            "thread.started",
+            "item.completed",
+            "turn.started",
+            "item.completed",
+            "turn.completed"
+          ],
+          "schemaVersion": "screenplay-writer-v1",
+          "route": [
+            "ai-video-producer",
+            "screenplay-writer"
+          ],
+          "completedAt": "2026-08-31T07:14:29.278Z"
+        }
+      },
+      "createdAt": "2026-08-31T07:14:29.283Z",
+      "inputArtifactRefs": [
+        {
+          "artifactId": "a961555f-1e59-4684-b7a2-96a9e26e24a1",
+          "contentHash": "54411e93e44555258a2f630948a9c7b438559b572bccc466f6240b2a4475c918"
+        },
+        {
+          "artifactId": "497b4460-2c52-4ac1-b458-c56bada3a5a5",
+          "contentHash": "bb4797f7dcd26b9a1b18b2658ed840a2e55d8fcf2efa65d08c20a4a804619b66"
+        }
+      ]
+    },
+    {
+      "schemaVersion": "workflow-v3-artifact-v1",
+      "artifactId": "04ea027f-4abd-4d66-b2b1-d256e2b276f9",
+      "projectId": "30000000-0000-4000-8000-000000000001",
+      "kind": "asset-bible",
+      "version": 1,
+      "ordinal": 4,
+      "parentArtifactId": null,
+      "inputArtifactIds": [
+        "acfd6eea-0d47-45a0-ac1e-f5dfad37becf"
+      ],
+      "contentHash": "c07fe54faf3d579b50c37289fa42696d11b2fbca41b2f2c400e050841a210b62",
+      "payload": {
+        "content": {
+          "assets": [
+            {
+              "assetId": "CHAR-001",
+              "kind": "character",
+              "name": "现实年轻人与异常镜像",
+              "promptFacts": [
+                "唯一出场人物；镜中形象是同一人的反射状态，不是第二名人物。",
+                "原创提案：约24岁、男性化呈现，175厘米左右的清瘦窄肩体型；偏暖浅肤色、窄椭圆脸、深棕眼睛，湿黑短发贴向额头，右眉上方垂落一束不对称湿发；穿深炭灰防雨短外套、蓝灰针织上衣、黑色直筒长裤和深色皮鞋。表演从雨夜疲惫与松弛逐渐转为警觉、僵硬和仓促逃离。",
+                "以低饱和深色轮廓塑造普通、可信的独居青年；现实人与镜像完全同貌，仅通过动作延迟、头部朝向和凝视差异表现异常。",
+                "右眉上方一束贴额湿发",
+                "清瘦窄肩、略微前倾的疲惫站姿",
+                "深炭灰外套配蓝灰针织领口",
+                "受惊时右手停在湿衣领处，视线先于身体锁定镜面"
+              ]
+            },
+            {
+              "assetId": "SCENE-001",
+              "kind": "scene",
+              "name": "雨夜旧公寓电梯轿厢",
+              "promptFacts": [
+                "全片唯一主要空间；一座狭窄、陈旧且仍在运行的公寓电梯内部。",
+                "原创提案：约1.35米宽、1.6米深、2.25米高的封闭轿厢，前方为双扇拉丝不锈钢门，右侧墙固定大镜面，左侧是泛黄仿木饰板与磨损金属控制面板；天花板嵌一块老化冷白荧光灯，角落有氧化接缝、轻微水汽和鞋底带入的湿痕。整体为石板灰、旧银色、烟褐色与病态冷白色；门开启时仅引入昏暗暖灰色楼层光。所有构图严格使用16:9。",
+                "16:9横向空间中固定门、人物和右侧镜面的可读关系，以真实老化材质和局促尺度承载克制的镜像异常。",
+                "前方磨损双扇金属门",
+                "右墙大镜面与现实人物可同时进入16:9画面",
+                "左墙泛黄仿木板和旧式竖向控制面板",
+                "单块冷白顶灯形成轻微眼窝阴影与金属反光"
+              ]
+            },
+            {
+              "assetId": "PROP-001",
+              "kind": "prop",
+              "name": "右墙旧镜面",
+              "promptFacts": [
+                "电梯内固定建筑镜面；负责呈现同一人物的正常反射与剧本规定的异常行为。",
+                "原创提案：约1.0米宽、1.8米高的竖向烟银色安全镜，薄型暗银金属压边，距地约20厘米；边缘有轻度氧化黑斑和清洁水痕，中部仍足够平整清晰，可准确辨认面部、手势与头部朝向。镜面不发光、不裂开、不形成实体通道。",
+                "以可正常工作的旧镜面承载表演型异常，让恐怖感只来自反射时间和凝视逻辑被破坏。",
+                "烟银色而非纯亮银的反射基调",
+                "四周轻度氧化的暗银窄边框",
+                "边缘水痕与中央清晰反射区形成层次",
+                "尺寸足以同时显示头部、整理衣领的手和上半身"
+              ]
+            },
+            {
+              "assetId": "COSTUME-001",
+              "kind": "costume",
+              "name": "雨夜归家服装",
+              "promptFacts": [
+                "CHAR-001在两个生产镜头中唯一使用的连续服装造型。",
+                "原创提案：哑光深炭灰防雨短外套采用窄翻领和暗银拉链，内搭蓝灰色细针织圆领上衣，下装为黑色直筒长裤与深棕黑低帮皮鞋；肩部、衣领外缘和袖口有不规则深色雨水浸痕，布料贴合但不滴水。固定色板为深炭灰、蓝灰、墨黑、暗银与深棕黑。",
+                "无品牌、低饱和、适合普通青年雨夜归家的实用服装，衣领和湿痕为镜像延迟提供清晰动作标记。",
+                "窄翻领形成可辨认的整理动作",
+                "右侧衣领湿痕略深于左侧",
+                "蓝灰针织领口从深色外套中露出",
+                "暗银短拉链提供克制的垂直高光"
+              ]
+            },
+            {
+              "assetId": "STYLE-001",
+              "kind": "style",
+              "name": "克制电影感写实与镜像异常规则",
+              "promptFacts": [
+                "统领角色、场景、材质、灯光和异常表现的项目级视觉规范。",
+                "严格采用16:9横画幅；低饱和石板灰、炭黑、旧银、烟褐与冷白为主，门开启时允许少量暖灰落地层光。使用可信的湿布、旧金属、氧化镜边和老化仿木纹理；中低反差曝光保留暗部细节，闪灯阶段以真实灯具明灭改变面部和镜面亮度。异常只通过连续表演与反射行为表达。",
+                "在16:9克制电影写实框架内，将超自然感限制为镜像时间差和凝视错位，保持短片清晰、可拍且不过度特效化。",
+                "16:9中现实人物、镜面和电梯门的横向空间关系",
+                "低饱和冷灰主色与落地层微暖光对比",
+                "湿润材质上的细窄高光",
+                "不依赖视觉特效的镜像表演异常"
+              ]
+            },
+            {
+              "assetId": "AUDIO-001",
+              "kind": "audio",
+              "name": "雨夜电梯环境与异常静默声场",
+              "promptFacts": [
+                "全片无对白的连续环境声、机械声与低限度紧张声床。",
+                "原创声音提案：远处雨声经电梯门衰减为低频背景，近处保留湿鞋脚步、衣领摩擦、电梯低沉运行嗡鸣、门机、老化灯管电流声与到站提示音；不使用旋律性配乐，仅在镜像异常时加入几乎不可察觉的低频张力，镜像本身不产生第二套动作声。",
+                "以真实电梯机械声和受控静默突出镜像动作差异，避免声音把异常解释成独立实体。",
+                "门关闭后雨声被明显隔绝",
+                "衣领摩擦声只对应现实人物动作",
+                "S002闪灯伴随短促电流噪声",
+                "到站提示音、开门声与急促退出脚步构成结尾"
+              ]
+            }
+          ]
+        },
+        "providerPayload": {
+          "assets": [
+            {
+              "id": "CHAR-001",
+              "type": "character",
+              "name": "现实年轻人与异常镜像",
+              "identity": "唯一出场人物；镜中形象是同一人的反射状态，不是第二名人物。",
+              "appearance": "原创提案：约24岁、男性化呈现，175厘米左右的清瘦窄肩体型；偏暖浅肤色、窄椭圆脸、深棕眼睛，湿黑短发贴向额头，右眉上方垂落一束不对称湿发；穿深炭灰防雨短外套、蓝灰针织上衣、黑色直筒长裤和深色皮鞋。表演从雨夜疲惫与松弛逐渐转为警觉、僵硬和仓促逃离。",
+              "designBasis": "creative-proposal",
+              "productionReady": true,
+              "designSummary": "以低饱和深色轮廓塑造普通、可信的独居青年；现实人与镜像完全同貌，仅通过动作延迟、头部朝向和凝视差异表现异常。",
+              "distinctiveFeatures": [
+                "右眉上方一束贴额湿发",
+                "清瘦窄肩、略微前倾的疲惫站姿",
+                "深炭灰外套配蓝灰针织领口",
+                "受惊时右手停在湿衣领处，视线先于身体锁定镜面"
+              ],
+              "negativeConstraints": [
+                "不得增加第二名人物、实体替身或镜后人影",
+                "镜像不得出现异色眼睛、怪物化面容或肢体畸变",
+                "不得在两个生产镜头之间更换发型、服装、体型或湿润状态"
+              ],
+              "referenceBaseline": null,
+              "continuityRules": [
+                "镜像始终继承现实人物的脸、头发、体型、服装和湿痕，只允许剧本规定的动作与凝视不同步。",
+                "productionShotId S001（0—7秒）锁定整理衣领与镜像慢半拍；productionShotId S002（7—15秒）锁定现实回头、镜像不回头并直视镜外。",
+                "雨水造成的湿发、衣领深色水痕和鞋面湿光连续保留，不得在7秒切点重置。"
+              ],
+              "usage": [
+                "productionShotId S001（0—7秒）：进入空电梯、整理湿衣领并察觉镜像延迟。",
+                "productionShotId S002（7—15秒）：在闪灯中回头、与未转身的镜像对视，随后冲出电梯。"
+              ],
+              "sourceEvidence": [
+                "sourceTextForEvidence：雨夜，一个独自回家的年轻人走进旧公寓电梯。",
+                "approvedScreenplay S001：整理湿衣领时，镜中的他隔了半拍才做出相同动作。",
+                "approvedScreenplay S002：现实人物回头并退出，镜中人不跟随回头而直视镜外。"
+              ],
+              "unknowns": [
+                "角色姓名、职业和过往经历未由剧本规定，不影响当前造型制作。"
+              ]
+            },
+            {
+              "id": "SCENE-001",
+              "type": "scene",
+              "name": "雨夜旧公寓电梯轿厢",
+              "identity": "全片唯一主要空间；一座狭窄、陈旧且仍在运行的公寓电梯内部。",
+              "appearance": "原创提案：约1.35米宽、1.6米深、2.25米高的封闭轿厢，前方为双扇拉丝不锈钢门，右侧墙固定大镜面，左侧是泛黄仿木饰板与磨损金属控制面板；天花板嵌一块老化冷白荧光灯，角落有氧化接缝、轻微水汽和鞋底带入的湿痕。整体为石板灰、旧银色、烟褐色与病态冷白色；门开启时仅引入昏暗暖灰色楼层光。所有构图严格使用16:9。",
+              "designBasis": "creative-proposal",
+              "productionReady": true,
+              "designSummary": "16:9横向空间中固定门、人物和右侧镜面的可读关系，以真实老化材质和局促尺度承载克制的镜像异常。",
+              "distinctiveFeatures": [
+                "前方磨损双扇金属门",
+                "右墙大镜面与现实人物可同时进入16:9画面",
+                "左墙泛黄仿木板和旧式竖向控制面板",
+                "单块冷白顶灯形成轻微眼窝阴影与金属反光"
+              ],
+              "negativeConstraints": [
+                "不得增加窗户、第二部电梯、额外房间或可辨识人物",
+                "不得使用豪华、崭新、未来主义或霓虹化装潢",
+                "门外落地层只作浅景深背景，不得扩展为新的叙事地点或支线"
+              ],
+              "referenceBaseline": null,
+              "continuityRules": [
+                "productionShotId S001（0—7秒）中门于2—4秒关闭；productionShotId S002（7—15秒）中门于13—15秒到站开启。",
+                "顶灯在S001保持稳定，S002的7—9秒开始间歇闪烁；墙面、镜面、门和控制面板位置不得改变。",
+                "必须原样保留两镜头拓扑：S001为0—7秒，S002为7—15秒，不得增设镜头或迁移事件。"
+              ],
+              "usage": [
+                "productionShotId S001（0—7秒）：呈现空轿厢、关门压迫感和首次镜像延迟。",
+                "productionShotId S002（7—15秒）：承载灯光闪烁、异常对视、到站开门和人物退出。"
+              ],
+              "sourceEvidence": [
+                "sourceTextForEvidence：故事发生于雨夜的旧公寓电梯，禁止增加其他地点。",
+                "approvedScreenplay S001：门在年轻人身后缓缓闭合，将他封闭在狭窄、陈旧的轿厢内。",
+                "explicitShotTopology：S001 0—7秒；S002 7—15秒。"
+              ],
+              "unknowns": [
+                "公寓所在城市、具体楼层和建筑年代未由剧本规定。"
+              ]
+            },
+            {
+              "id": "PROP-001",
+              "type": "prop",
+              "name": "右墙旧镜面",
+              "identity": "电梯内固定建筑镜面；负责呈现同一人物的正常反射与剧本规定的异常行为。",
+              "appearance": "原创提案：约1.0米宽、1.8米高的竖向烟银色安全镜，薄型暗银金属压边，距地约20厘米；边缘有轻度氧化黑斑和清洁水痕，中部仍足够平整清晰，可准确辨认面部、手势与头部朝向。镜面不发光、不裂开、不形成实体通道。",
+              "designBasis": "creative-proposal",
+              "productionReady": true,
+              "designSummary": "以可正常工作的旧镜面承载表演型异常，让恐怖感只来自反射时间和凝视逻辑被破坏。",
+              "distinctiveFeatures": [
+                "烟银色而非纯亮银的反射基调",
+                "四周轻度氧化的暗银窄边框",
+                "边缘水痕与中央清晰反射区形成层次",
+                "尺寸足以同时显示头部、整理衣领的手和上半身"
+              ],
+              "negativeConstraints": [
+                "不得出现裂纹、液化、波纹、传送门或数字故障效果",
+                "不得在镜中增加现实空间不存在的人物或物体",
+                "不得用浓雾、污垢或强眩光遮住关键动作和眼神"
+              ],
+              "referenceBaseline": null,
+              "continuityRules": [
+                "S001的4—7秒仅让反射动作慢半拍，镜中服装、湿痕和空间透视仍与现实一致。",
+                "S002的9—13秒现实人物回头而反射保持原位并直视镜外；不得改为独立走动或变形。",
+                "S002的13—15秒保留门开启前最后可见的异常凝视，不得把该事件移动到S001。"
+              ],
+              "usage": [
+                "productionShotId S001（0—7秒）：清晰展示整理衣领动作的半拍延迟。",
+                "productionShotId S002（7—15秒）：展示镜像不随现实人物回头、持续凝视镜外。"
+              ],
+              "sourceEvidence": [
+                "approvedScreenplay S001：镜中的他隔了半拍才做出相同动作。",
+                "approvedScreenplay S002：镜中人没有跟随回头，仍保持原位并直视镜外。",
+                "approvedScreenplay S002：镜中人的凝视留在门开启前最后可见的镜面中。"
+              ],
+              "unknowns": []
+            },
+            {
+              "id": "COSTUME-001",
+              "type": "costume",
+              "name": "雨夜归家服装",
+              "identity": "CHAR-001在两个生产镜头中唯一使用的连续服装造型。",
+              "appearance": "原创提案：哑光深炭灰防雨短外套采用窄翻领和暗银拉链，内搭蓝灰色细针织圆领上衣，下装为黑色直筒长裤与深棕黑低帮皮鞋；肩部、衣领外缘和袖口有不规则深色雨水浸痕，布料贴合但不滴水。固定色板为深炭灰、蓝灰、墨黑、暗银与深棕黑。",
+              "designBasis": "creative-proposal",
+              "productionReady": true,
+              "designSummary": "无品牌、低饱和、适合普通青年雨夜归家的实用服装，衣领和湿痕为镜像延迟提供清晰动作标记。",
+              "distinctiveFeatures": [
+                "窄翻领形成可辨认的整理动作",
+                "右侧衣领湿痕略深于左侧",
+                "蓝灰针织领口从深色外套中露出",
+                "暗银短拉链提供克制的垂直高光"
+              ],
+              "negativeConstraints": [
+                "不得出现鲜艳色块、可读品牌、图案文字或夸张配饰",
+                "不得增加帽子、围巾、背包或雨伞遮挡轮廓",
+                "不得让现实服装与镜中服装出现颜色、剪裁或湿痕差异"
+              ],
+              "referenceBaseline": null,
+              "continuityRules": [
+                "S001进入电梯时外套、发梢和鞋面已带雨水，湿润程度在S002继续保留。",
+                "S001的4—7秒由右手整理窄翻领；镜像服装仅随动作延迟，不产生独立变化。",
+                "两个生产镜头保持同一穿着层次、拉链位置、袖口长度和水痕分布。"
+              ],
+              "usage": [
+                "productionShotId S001（0—7秒）：作为整理衣领及镜像慢半拍的视觉参照。",
+                "productionShotId S002（7—15秒）：保持轮廓连续，支持回头、僵住和快速退出动作。"
+              ],
+              "sourceEvidence": [
+                "approvedScreenplay S001：年轻人带着雨夜的湿气进入电梯。",
+                "approvedScreenplay S001：年轻人抬手整理被雨水打湿的衣领。",
+                "approvedScreenplay S002：现实中的年轻人立即冲出电梯。"
+              ],
+              "unknowns": []
+            },
+            {
+              "id": "STYLE-001",
+              "type": "style",
+              "name": "克制电影感写实与镜像异常规则",
+              "identity": "统领角色、场景、材质、灯光和异常表现的项目级视觉规范。",
+              "appearance": "严格采用16:9横画幅；低饱和石板灰、炭黑、旧银、烟褐与冷白为主，门开启时允许少量暖灰落地层光。使用可信的湿布、旧金属、氧化镜边和老化仿木纹理；中低反差曝光保留暗部细节，闪灯阶段以真实灯具明灭改变面部和镜面亮度。异常只通过连续表演与反射行为表达。",
+              "designBasis": "creative-proposal",
+              "productionReady": true,
+              "designSummary": "在16:9克制电影写实框架内，将超自然感限制为镜像时间差和凝视错位，保持短片清晰、可拍且不过度特效化。",
+              "distinctiveFeatures": [
+                "16:9中现实人物、镜面和电梯门的横向空间关系",
+                "低饱和冷灰主色与落地层微暖光对比",
+                "湿润材质上的细窄高光",
+                "不依赖视觉特效的镜像表演异常"
+              ],
+              "negativeConstraints": [
+                "不得使用16:9以外的画幅、竖屏构图或分屏",
+                "不得加入血腥、怪物化、镜面破裂、故障叠层或超现实空间变形",
+                "不得加入字幕、片名卡、旁白人物画面或额外叙事插镜"
+              ],
+              "referenceBaseline": null,
+              "continuityRules": [
+                "原样锁定productionShotId S001为0—7秒、S002为7—15秒，总时长15秒且恰好两个生产镜头。",
+                "两个镜头保持同一角色模型、服装、轿厢几何、镜面位置和基础色板。",
+                "事件不得跨镜迁移：镜像慢半拍属于S001；闪灯、不随回头、对视和退出属于S002。"
+              ],
+              "usage": [
+                "用于全部角色、场景、道具、灯光和后续镜头美术审核。",
+                "用于productionShotId S001（0—7秒）与S002（7—15秒）的统一16:9视觉执行。"
+              ],
+              "sourceEvidence": [
+                "project.visualStyle：克制的电影感写实风格。",
+                "project.aspectRatio：16:9。",
+                "sourceTextForEvidence：总时长15秒，必须恰好使用S001与S002两个生产镜头。"
+              ],
+              "unknowns": []
+            },
+            {
+              "id": "AUDIO-001",
+              "type": "audio",
+              "name": "雨夜电梯环境与异常静默声场",
+              "identity": "全片无对白的连续环境声、机械声与低限度紧张声床。",
+              "appearance": "原创声音提案：远处雨声经电梯门衰减为低频背景，近处保留湿鞋脚步、衣领摩擦、电梯低沉运行嗡鸣、门机、老化灯管电流声与到站提示音；不使用旋律性配乐，仅在镜像异常时加入几乎不可察觉的低频张力，镜像本身不产生第二套动作声。",
+              "designBasis": "creative-proposal",
+              "productionReady": true,
+              "designSummary": "以真实电梯机械声和受控静默突出镜像动作差异，避免声音把异常解释成独立实体。",
+              "distinctiveFeatures": [
+                "门关闭后雨声被明显隔绝",
+                "衣领摩擦声只对应现实人物动作",
+                "S002闪灯伴随短促电流噪声",
+                "到站提示音、开门声与急促退出脚步构成结尾"
+              ],
+              "negativeConstraints": [
+                "不得增加对白、旁白、耳语、第二人的呼吸或脚步",
+                "不得使用跳吓重击、夸张恐怖尖啸或旋律性主题音乐",
+                "不得为延迟镜像复制一套滞后的衣料声或动作声"
+              ],
+              "referenceBaseline": null,
+              "continuityRules": [
+                "S001的0—4秒由雨声、湿鞋脚步和门机声过渡到封闭轿厢嗡鸣；4—7秒突出一次现实衣领摩擦声。",
+                "S002的7—9秒加入灯管电流断续声，9—13秒压低环境层但保持电梯运行连续。",
+                "S002的13—15秒依次呈现到站提示、开门机械声和现实人物快速退出脚步，不得把结尾声移入S001。"
+              ],
+              "usage": [
+                "productionShotId S001（0—7秒）：建立雨夜归家、电梯封闭和镜像异常前的现实声场。",
+                "productionShotId S002（7—15秒）：支持闪灯、凝视停顿、到站开门与仓促退出。"
+              ],
+              "sourceEvidence": [
+                "approvedScreenplay：全片dialogue均为空。",
+                "approvedScreenplay S001：雨夜进入电梯、门缓缓闭合并整理湿衣领。",
+                "approvedScreenplay S002：灯光闪烁、电梯到站开门、现实人物立即冲出。"
+              ],
+              "unknowns": []
+            }
+          ],
+          "conflicts": []
+        },
+        "trace": {
+          "provider": "codex-cli",
+          "model": "gpt-5.6-sol",
+          "runId": "redacted-live-asset-bible",
+          "threadId": null,
+          "usage": {
+            "input_tokens": 23353,
+            "cached_input_tokens": 0,
+            "cache_write_input_tokens": 0,
+            "output_tokens": 6204,
+            "reasoning_output_tokens": 2543
+          },
+          "eventTypes": [
+            "thread.started",
+            "item.completed",
+            "turn.started",
+            "item.completed",
+            "turn.completed"
+          ],
+          "schemaVersion": "asset-bible-builder-v1",
+          "route": [
+            "ai-video-producer",
+            "asset-bible-builder"
+          ],
+          "completedAt": "2026-08-31T07:16:26.084Z"
+        }
+      },
+      "createdAt": "2026-08-31T07:16:26.089Z",
+      "inputArtifactRefs": [
+        {
+          "artifactId": "acfd6eea-0d47-45a0-ac1e-f5dfad37becf",
+          "contentHash": "8379aa3216cccefc406241b26c99046e2b71a1610731de0ceacbf07006805e7c"
+        }
+      ]
+    },
+    {
+      "schemaVersion": "workflow-v3-artifact-v1",
+      "artifactId": "56db0a57-39ba-47a6-8f54-0d7b5ae1f21b",
+      "projectId": "30000000-0000-4000-8000-000000000001",
+      "kind": "shooting-script",
+      "version": 1,
+      "ordinal": 5,
+      "parentArtifactId": null,
+      "inputArtifactIds": [
+        "acfd6eea-0d47-45a0-ac1e-f5dfad37becf",
+        "04ea027f-4abd-4d66-b2b1-d256e2b276f9"
+      ],
+      "contentHash": "5a7f92e76753ab705e692a0f2cba85aed9d2e481c3b65bc85725a3ba68ad83c9",
+      "payload": {
+        "content": {
+          "shots": [
+            {
+              "displayId": "S001",
+              "sceneId": "SCENE-001",
+              "durationSec": 7,
+              "action": "0—2秒，摄影机从轿厢内看见年轻人带着湿气跨过敞开的门槛进入轿厢；他转身面向门，右墙镜面中只出现同一人的镜像。2秒双扇门开始在他身后合拢，门外空间随门缝收窄而逐渐被遮住，并在4秒前后完全关闭。4秒年轻人抬起右手整理湿衣领；镜像在4.5秒才开始复制同一动作。6秒现实中的右手突然停在衣领处，头和目光转向镜面；镜像继续完成迟到的最后半拍，并在6.5秒停到相同手位。年轻人保持手扶衣领、凝视镜面的警觉姿态至7秒。",
+              "startState": "电梯门完全敞开；摄影机位于轿厢左后侧；年轻人正从雨夜落地层跨入轿厢，湿发、衣领水痕和鞋面湿光清晰连续；顶灯稳定；右墙镜面完好，镜内只有同一年轻人的单一镜像。",
+              "endState": "电梯门完全关闭；摄影机仍在轿厢内；年轻人站在轿厢中部面向门，身体未转，右手静止扶在湿衣领处，头转向右墙、目光锁定镜面；顶灯稳定；镜中单一镜像已完成迟到的衣领动作并停在相同手位；湿发、服装层次、水痕、门、镜面和控制面板位置均未改变。",
+              "camera": {
+                "position": "摄影机始终位于电梯轿厢内左后侧，以斜角同时容纳门口、现实年轻人和右墙镜面。",
+                "movement": "单镜连续完成建立、一次沿左墙短横移和结尾轻微前推；摄影机不穿越电梯门槛。"
+              },
+              "assetIds": [
+                "CHAR-001",
+                "SCENE-001",
+                "PROP-001",
+                "STYLE-001"
+              ],
+              "shotUid": "2fb10a10-a3f1-4a64-bfa9-a4bfb80025e3"
+            },
+            {
+              "displayId": "S002",
+              "sceneId": "SCENE-001",
+              "durationSec": 8,
+              "action": "项目7秒（本镜0秒）承接上一镜：门已关闭，年轻人仍以右手扶住湿衣领并凝视镜面；顶灯立即开始间歇闪烁。项目9秒（本镜2秒），年轻人右手离开衣领，身体和头猛然转向身后；镜内唯一人物图像拒绝跟随，保持原先门向站姿，并越过镜面直视镜外。项目12秒（本镜5秒），年轻人以仍然扭转的身体姿态将头和视线重新锁回镜面，僵住并与镜中人短暂对视。项目13秒（本镜6秒），到站提示响起，双扇门开始打开；门缝出现的同一刻，暖灰落地层即局部可见。项目14秒（本镜7秒），年轻人转向门口并冲过真实门槛；摄影机仅跟到门槛内侧，镜中人的异常凝视保持到右墙镜面在跟移构图中滑出画面的最后一刻。15秒结束时，年轻人已到门外，门仍处于开启末段。",
+              "startState": "与S001结束状态完全一致：门完全关闭；年轻人位于轿厢中部并面向门，右手静止扶在湿衣领处，头转向右墙、目光锁定镜面；镜内单一人物图像的手已停在对应衣领位置；顶灯尚稳定；湿发、服装、水痕、门、镜面和控制面板状态均未重置。",
+              "endState": "摄影机仍位于轿厢内并停在门槛内侧；双扇门大幅打开但仍处于开启末段，暖灰落地层部分可见；现实年轻人已跨过门槛到达门外，正继续快速离开；他的右手已离开衣领。顶灯的异常闪烁已随到站阶段停止并恢复冷白照明。镜中单一人物图像保持不随回头的正面姿态和镜外凝视，直至镜面在结尾跟移中滑出画面；角色外貌、服装与湿痕保持连续。",
+              "camera": {
+                "position": "摄影机重新建立在同一轿厢左后侧，始终留在轿厢内部，以人物肩后斜角同时读取现实姿态和右墙镜像。",
+                "movement": "单镜连续完成短暂定机、一次沿左墙侧移和结尾朝门方向的轻微跟移；跟移止于门槛内侧。"
+              },
+              "assetIds": [
+                "CHAR-001",
+                "SCENE-001",
+                "PROP-001",
+                "STYLE-001"
+              ],
+              "shotUid": "488be859-a8c1-48fd-a5b9-c7f3b3f37701"
+            }
+          ]
+        },
+        "providerPayload": {
+          "schemaVersion": "shooting-script-v2",
+          "targetDurationSec": 15,
+          "shots": [
+            {
+              "id": "S001",
+              "projectId": "30000000-0000-4000-8000-000000000001",
+              "sequence": 1,
+              "startTimeSec": 0,
+              "endTimeSec": 7,
+              "durationSec": 7,
+              "purpose": "建立雨夜旧电梯的封闭空间，并以同一镜像慢半拍完成首次异常揭示。",
+              "characterIds": [
+                "CHAR-001"
+              ],
+              "sceneId": "SCENE-001",
+              "propIds": [
+                "PROP-001"
+              ],
+              "styleIds": [
+                "STYLE-001"
+              ],
+              "shotSize": "中广景收至中景",
+              "camera": {
+                "position": "摄影机始终位于电梯轿厢内左后侧，以斜角同时容纳门口、现实年轻人和右墙镜面。",
+                "movement": "单镜连续完成建立、一次沿左墙短横移和结尾轻微前推；摄影机不穿越电梯门槛。",
+                "lens": "28mm等效广角，控制边缘畸变，保持轿厢尺度可信。",
+                "composition": "16:9；现实人物居中偏左，右墙镜面占右侧约三分之一，前方双扇门保持可读。"
+              },
+              "action": "0—2秒，摄影机从轿厢内看见年轻人带着湿气跨过敞开的门槛进入轿厢；他转身面向门，右墙镜面中只出现同一人的镜像。2秒双扇门开始在他身后合拢，门外空间随门缝收窄而逐渐被遮住，并在4秒前后完全关闭。4秒年轻人抬起右手整理湿衣领；镜像在4.5秒才开始复制同一动作。6秒现实中的右手突然停在衣领处，头和目光转向镜面；镜像继续完成迟到的最后半拍，并在6.5秒停到相同手位。年轻人保持手扶衣领、凝视镜面的警觉姿态至7秒。",
+              "dialogue": [],
+              "sound": [
+                "SCENE-001｜0—7秒：门外衰减雨声在门闭合过程中被逐步隔绝；2—4秒门机运转，闭合后只保留连续低沉的电梯运行嗡鸣。",
+                "CHAR-001｜0—2秒：一组与现实年轻人入厢动作同步的湿鞋脚步，进入站定后停止。",
+                "COSTUME-001｜4—6秒：仅现实人物整理衣领产生一次连续布料摩擦声；镜像延迟动作不产生第二套声音。"
+              ],
+              "startState": "电梯门完全敞开；摄影机位于轿厢左后侧；年轻人正从雨夜落地层跨入轿厢，湿发、衣领水痕和鞋面湿光清晰连续；顶灯稳定；右墙镜面完好，镜内只有同一年轻人的单一镜像。",
+              "endState": "电梯门完全关闭；摄影机仍在轿厢内；年轻人站在轿厢中部面向门，身体未转，右手静止扶在湿衣领处，头转向右墙、目光锁定镜面；顶灯稳定；镜中单一镜像已完成迟到的衣领动作并停在相同手位；湿发、服装层次、水痕、门、镜面和控制面板位置均未改变。",
+              "physicalPlan": {
+                "schemaVersion": "shot-physical-plan-v1",
+                "cameraContinuityMode": "single-take",
+                "spaceTopology": {
+                  "spaces": [
+                    {
+                      "spaceId": "SPACE-CABIN",
+                      "label": "旧公寓电梯轿厢内部"
+                    },
+                    {
+                      "spaceId": "SPACE-LANDING",
+                      "label": "门外雨夜落地层浅景深区域"
+                    }
+                  ],
+                  "boundaries": [
+                    {
+                      "boundaryId": "BOUNDARY-ELEVATOR-THRESHOLD",
+                      "fromSpaceId": "SPACE-LANDING",
+                      "toSpaceId": "SPACE-CABIN",
+                      "traversalAllowed": true,
+                      "label": "前方双扇电梯门形成的真实门槛；人物可穿越，摄影机本镜不穿越"
+                    }
+                  ]
+                },
+                "applicability": {
+                  "displaySurfaces": false,
+                  "reflectiveSurfaces": true,
+                  "delayedStateChanges": true
+                },
+                "entities": [
+                  {
+                    "instanceId": "INST-CABIN",
+                    "assetId": "SCENE-001",
+                    "domain": "real-space",
+                    "role": "轿厢、双扇门、顶灯和门外落地层的现实空间载体，也是环境机械声发声体"
+                  },
+                  {
+                    "instanceId": "INST-YOUNG-MAN",
+                    "assetId": "CHAR-001",
+                    "domain": "real-space",
+                    "role": "唯一现实人物"
+                  },
+                  {
+                    "instanceId": "INST-RAIN-COSTUME",
+                    "assetId": "COSTUME-001",
+                    "domain": "real-space",
+                    "role": "INST-YOUNG-MAN穿着的连续雨夜服装及衣领摩擦声发声体"
+                  },
+                  {
+                    "instanceId": "INST-RIGHT-MIRROR",
+                    "assetId": "PROP-001",
+                    "domain": "real-space",
+                    "role": "右墙固定旧镜面及异常镜像的可见反射边界"
+                  },
+                  {
+                    "instanceId": "INST-MIRROR-ANOMALY",
+                    "assetId": "CHAR-001",
+                    "domain": "reflection-only",
+                    "role": "镜内唯一人物图像；外貌继承现实人物，4.5秒起显露半拍动作延迟，不是第二个现实人物"
+                  }
+                ],
+                "cameraSegments": [
+                  {
+                    "startOffsetSec": 0,
+                    "endOffsetSec": 2,
+                    "viewpoint": "front",
+                    "screenDirection": "门外至轿厢内为画面纵深方向；年轻人由前景门口向画面中部进入。",
+                    "spaceId": "SPACE-CABIN",
+                    "positionAnchor": "轿厢左后角，离左墙约0.25米、离后墙约0.30米，机位胸口高度。",
+                    "lookAt": "敞开的电梯门槛、正在进入的INST-YOUNG-MAN及右墙INST-RIGHT-MIRROR。",
+                    "transitionFromPrevious": "initial",
+                    "boundaryId": null,
+                    "transitionPath": null
+                  },
+                  {
+                    "startOffsetSec": 2,
+                    "endOffsetSec": 4,
+                    "viewpoint": "profile",
+                    "screenDirection": "年轻人居中偏左，门在前方闭合，镜面稳定留在画面右侧。",
+                    "spaceId": "SPACE-CABIN",
+                    "positionAnchor": "沿轿厢左墙由左后角向前移动约0.45米的中段机位。",
+                    "lookAt": "转身后的INST-YOUNG-MAN、正在闭合的双扇门和镜中的单一人物图像。",
+                    "transitionFromPrevious": "continuous",
+                    "boundaryId": null,
+                    "transitionPath": "摄影机在轿厢左侧无障碍净空内沿左墙单向前移约0.45米，不后退、不绕行，也不接近或穿越门槛。"
+                  },
+                  {
+                    "startOffsetSec": 4,
+                    "endOffsetSec": 7,
+                    "viewpoint": "profile",
+                    "screenDirection": "现实人物保持画面中左，右手与衣领轮廓清晰；镜面人物保留在右侧同一构图区域。",
+                    "spaceId": "SPACE-CABIN",
+                    "positionAnchor": "左墙中段向人物轻微前推约0.30米后的稳定机位。",
+                    "lookAt": "INST-YOUNG-MAN的右手、湿衣领、头部与INST-MIRROR-ANOMALY的延迟动作。",
+                    "transitionFromPrevious": "continuous",
+                    "boundaryId": null,
+                    "transitionPath": "从左墙中段沿既有视轴缓慢前推约0.30米后稳定，不改变空间侧别，不形成环绕。"
+                  }
+                ],
+                "subjectOrientations": [
+                  {
+                    "startOffsetSec": 0,
+                    "endOffsetSec": 2,
+                    "instanceId": "INST-YOUNG-MAN",
+                    "bodyFaces": "先朝轿厢内部行进，跨过门槛后顺势转向前方电梯门。",
+                    "headFaces": "随身体由轿厢内部方向转向电梯门。",
+                    "gazeTarget": "轿厢内落脚位置，随后转向前方门板。"
+                  },
+                  {
+                    "startOffsetSec": 2,
+                    "endOffsetSec": 4,
+                    "instanceId": "INST-YOUNG-MAN",
+                    "bodyFaces": "前方双扇电梯门。",
+                    "headFaces": "前方双扇电梯门。",
+                    "gazeTarget": "正在闭合的门缝。"
+                  },
+                  {
+                    "startOffsetSec": 4,
+                    "endOffsetSec": 6,
+                    "instanceId": "INST-YOUNG-MAN",
+                    "bodyFaces": "前方双扇电梯门，身体不转。",
+                    "headFaces": "先微低看向右侧衣领，随后逐渐转向右墙镜面。",
+                    "gazeTarget": "右侧湿衣领，继而移向镜中的手部动作。"
+                  },
+                  {
+                    "startOffsetSec": 6,
+                    "endOffsetSec": 7,
+                    "instanceId": "INST-YOUNG-MAN",
+                    "bodyFaces": "前方双扇电梯门。",
+                    "headFaces": "右墙镜面。",
+                    "gazeTarget": "INST-MIRROR-ANOMALY的手和脸。"
+                  },
+                  {
+                    "startOffsetSec": 0,
+                    "endOffsetSec": 4.5,
+                    "instanceId": "INST-MIRROR-ANOMALY",
+                    "bodyFaces": "按镜面对称关系复制现实人物的身体朝向。",
+                    "headFaces": "按镜面对称关系复制现实人物的头部朝向。",
+                    "gazeTarget": "按正常镜像关系复制现实人物的视线目标。"
+                  },
+                  {
+                    "startOffsetSec": 4.5,
+                    "endOffsetSec": 6.5,
+                    "instanceId": "INST-MIRROR-ANOMALY",
+                    "bodyFaces": "保持与现实人物对应的门向站姿。",
+                    "headFaces": "比现实人物晚半拍完成由衣领向镜外人物方向的转动。",
+                    "gazeTarget": "迟半拍跟随现实人物的衣领与面部视线变化。"
+                  },
+                  {
+                    "startOffsetSec": 6.5,
+                    "endOffsetSec": 7,
+                    "instanceId": "INST-MIRROR-ANOMALY",
+                    "bodyFaces": "保持与现实人物对应的门向站姿。",
+                    "headFaces": "停在与现实人物相对应的镜面对称角度。",
+                    "gazeTarget": "镜外的INST-YOUNG-MAN。"
+                  }
+                ],
+                "displayRelations": [],
+                "reflectionRelations": [
+                  {
+                    "surfaceId": "INST-RIGHT-MIRROR",
+                    "normalReflectionPairs": [],
+                    "mirrorOnlyInstanceIds": [
+                      "INST-MIRROR-ANOMALY"
+                    ],
+                    "realSpaceInstanceIds": [
+                      "INST-YOUNG-MAN"
+                    ],
+                    "boundaryVisibleInFrame": true
+                  }
+                ],
+                "timedStateGates": [
+                  {
+                    "stateId": "STATE-S001-DOOR-CLOSING",
+                    "startsAtOffsetSec": 2,
+                    "beforeState": "双扇门完全敞开，门外落地层完整可见。",
+                    "afterState": "双扇门开始合拢；落地层随门缝缩小而仍保持部分可见，直至约4秒门扇相接并完全遮住门外。",
+                    "noEarlyOccurrence": true,
+                    "eventFacts": [
+                      {
+                        "factId": "FACT-S001-DOOR-MOTION",
+                        "subjectType": "scene",
+                        "subjectId": "SCENE-001",
+                        "property": "elevatorDoorState",
+                        "beforeValue": "fully-open",
+                        "afterValue": "closing-from-open-and-fully-closed-by-offset-4"
+                      }
+                    ]
+                  },
+                  {
+                    "stateId": "STATE-S001-COLLAR-ACTION",
+                    "startsAtOffsetSec": 4,
+                    "beforeState": "现实年轻人的右手垂落，衣领未被整理。",
+                    "afterState": "现实年轻人抬起右手并开始连续整理右侧湿衣领。",
+                    "noEarlyOccurrence": true,
+                    "eventFacts": [
+                      {
+                        "factId": "FACT-S001-REAL-HAND",
+                        "subjectType": "character",
+                        "subjectId": "CHAR-001",
+                        "property": "rightHandAction",
+                        "beforeValue": "lowered-and-still",
+                        "afterValue": "adjusting-right-wet-collar"
+                      }
+                    ]
+                  },
+                  {
+                    "stateId": "STATE-S001-REFLECTION-DELAY",
+                    "startsAtOffsetSec": 4.5,
+                    "beforeState": "现实人物已在整理衣领，镜内手部仍停在动作前位置。",
+                    "afterState": "镜内唯一人物图像开始复制同一整理动作，明确落后现实人物半拍。",
+                    "noEarlyOccurrence": true,
+                    "eventFacts": [
+                      {
+                        "factId": "FACT-S001-MIRROR-HAND",
+                        "subjectType": "character",
+                        "subjectId": "INST-MIRROR-ANOMALY",
+                        "property": "reflectedRightHandAction",
+                        "beforeValue": "pre-adjustment-position-while-real-hand-moves",
+                        "afterValue": "same-collar-adjustment-with-half-beat-delay"
+                      }
+                    ]
+                  },
+                  {
+                    "stateId": "STATE-S001-REAL-FREEZE",
+                    "startsAtOffsetSec": 6,
+                    "beforeState": "现实年轻人的右手仍在整理衣领，视线正由衣领转向镜面。",
+                    "afterState": "现实年轻人的右手立即停在衣领处，头转向右墙，目光锁定镜内动作。",
+                    "noEarlyOccurrence": true,
+                    "eventFacts": [
+                      {
+                        "factId": "FACT-S001-REAL-HAND-STOP",
+                        "subjectType": "character",
+                        "subjectId": "CHAR-001",
+                        "property": "rightHandMotion",
+                        "beforeValue": "adjusting-collar",
+                        "afterValue": "frozen-on-collar"
+                      },
+                      {
+                        "factId": "FACT-S001-REAL-GAZE",
+                        "subjectType": "character",
+                        "subjectId": "CHAR-001",
+                        "property": "gazeTarget",
+                        "beforeValue": "collar-and-moving-reflection",
+                        "afterValue": "mirror-anomaly"
+                      }
+                    ]
+                  },
+                  {
+                    "stateId": "STATE-S001-REFLECTION-FREEZE",
+                    "startsAtOffsetSec": 6.5,
+                    "beforeState": "现实人物已静止，镜内手部仍在完成迟到的动作末段。",
+                    "afterState": "镜内手部到达与现实人物相同的衣领位置并停止，半拍延迟完成。",
+                    "noEarlyOccurrence": true,
+                    "eventFacts": [
+                      {
+                        "factId": "FACT-S001-MIRROR-HAND-STOP",
+                        "subjectType": "character",
+                        "subjectId": "INST-MIRROR-ANOMALY",
+                        "property": "reflectedRightHandMotion",
+                        "beforeValue": "finishing-delayed-collar-adjustment",
+                        "afterValue": "frozen-on-matching-collar-position"
+                      }
+                    ]
+                  }
+                ],
+                "feasibilityNotes": [
+                  "本镜严格使用显式拓扑S001：0—7秒，共7秒；映射为一个生成任务。",
+                  "四个主要可见剧情Beat为进入、关门、整理衣领并显露延迟、停手凝视；三段摄影机运动均在限制内。",
+                  "唯一高风险层为复杂镜像关系；无屏幕、复制体群体或反常直连空间。镜内始终只有一个人物图像，不叠加正常反射副本。",
+                  "五个精确事件门符合7秒镜头最多五个时间锚点的限制。",
+                  "摄影机全程位于SPACE-CABIN，未穿越门槛；人物进入时的真实门槛和门扇遮挡过程持续可见。"
+                ]
+              },
+              "preferredProvider": null,
+              "status": "draft"
+            },
+            {
+              "id": "S002",
+              "projectId": "30000000-0000-4000-8000-000000000001",
+              "sequence": 2,
+              "startTimeSec": 7,
+              "endTimeSec": 15,
+              "durationSec": 8,
+              "purpose": "延续上一镜的精确边界状态，通过闪灯、镜像拒绝回头和现实人物逃离完成异常升级。",
+              "characterIds": [
+                "CHAR-001"
+              ],
+              "sceneId": "SCENE-001",
+              "propIds": [
+                "PROP-001"
+              ],
+              "styleIds": [
+                "STYLE-001"
+              ],
+              "shotSize": "中景至中广景",
+              "camera": {
+                "position": "摄影机重新建立在同一轿厢左后侧，始终留在轿厢内部，以人物肩后斜角同时读取现实姿态和右墙镜像。",
+                "movement": "单镜连续完成短暂定机、一次沿左墙侧移和结尾朝门方向的轻微跟移；跟移止于门槛内侧。",
+                "lens": "35mm等效镜头，兼顾狭窄空间和镜中眼神可读性。",
+                "composition": "16:9；前半段现实人物居中偏左、镜面占右侧，门位于纵深前方；结尾跟随人物冲门，使镜面从画面右缘自然滑出。"
+              },
+              "action": "项目7秒（本镜0秒）承接上一镜：门已关闭，年轻人仍以右手扶住湿衣领并凝视镜面；顶灯立即开始间歇闪烁。项目9秒（本镜2秒），年轻人右手离开衣领，身体和头猛然转向身后；镜内唯一人物图像拒绝跟随，保持原先门向站姿，并越过镜面直视镜外。项目12秒（本镜5秒），年轻人以仍然扭转的身体姿态将头和视线重新锁回镜面，僵住并与镜中人短暂对视。项目13秒（本镜6秒），到站提示响起，双扇门开始打开；门缝出现的同一刻，暖灰落地层即局部可见。项目14秒（本镜7秒），年轻人转向门口并冲过真实门槛；摄影机仅跟到门槛内侧，镜中人的异常凝视保持到右墙镜面在跟移构图中滑出画面的最后一刻。15秒结束时，年轻人已到门外，门仍处于开启末段。",
+              "dialogue": [],
+              "sound": [
+                "SCENE-001｜0—8秒：电梯运行嗡鸣连续存在；0—2秒叠加与灯闪同步的断续电流噪声，2—6秒压低环境层但不抽空，6秒依次进入到站提示和持续至结尾的开门机械声。",
+                "CHAR-001｜7—8秒：仅现实年轻人冲出时产生一组急促湿鞋脚步；镜内人物图像不产生脚步或第二套动作声。"
+              ],
+              "startState": "与S001结束状态完全一致：门完全关闭；年轻人位于轿厢中部并面向门，右手静止扶在湿衣领处，头转向右墙、目光锁定镜面；镜内单一人物图像的手已停在对应衣领位置；顶灯尚稳定；湿发、服装、水痕、门、镜面和控制面板状态均未重置。",
+              "endState": "摄影机仍位于轿厢内并停在门槛内侧；双扇门大幅打开但仍处于开启末段，暖灰落地层部分可见；现实年轻人已跨过门槛到达门外，正继续快速离开；他的右手已离开衣领。顶灯的异常闪烁已随到站阶段停止并恢复冷白照明。镜中单一人物图像保持不随回头的正面姿态和镜外凝视，直至镜面在结尾跟移中滑出画面；角色外貌、服装与湿痕保持连续。",
+              "physicalPlan": {
+                "schemaVersion": "shot-physical-plan-v1",
+                "cameraContinuityMode": "single-take",
+                "spaceTopology": {
+                  "spaces": [
+                    {
+                      "spaceId": "SPACE-CABIN",
+                      "label": "旧公寓电梯轿厢内部"
+                    },
+                    {
+                      "spaceId": "SPACE-LANDING",
+                      "label": "到站后门外的暖灰色落地层浅景深区域"
+                    }
+                  ],
+                  "boundaries": [
+                    {
+                      "boundaryId": "BOUNDARY-ELEVATOR-THRESHOLD",
+                      "fromSpaceId": "SPACE-CABIN",
+                      "toSpaceId": "SPACE-LANDING",
+                      "traversalAllowed": true,
+                      "label": "双扇电梯门形成的真实门槛；年轻人结尾穿越，摄影机停在轿厢一侧"
+                    }
+                  ]
+                },
+                "applicability": {
+                  "displaySurfaces": false,
+                  "reflectiveSurfaces": true,
+                  "delayedStateChanges": true
+                },
+                "entities": [
+                  {
+                    "instanceId": "INST-CABIN",
+                    "assetId": "SCENE-001",
+                    "domain": "real-space",
+                    "role": "轿厢、双扇门、顶灯和门外落地层的现实空间载体，也是环境机械与灯管声音发声体"
+                  },
+                  {
+                    "instanceId": "INST-YOUNG-MAN",
+                    "assetId": "CHAR-001",
+                    "domain": "real-space",
+                    "role": "唯一现实人物；从轿厢内穿过真实门槛退出"
+                  },
+                  {
+                    "instanceId": "INST-RAIN-COSTUME",
+                    "assetId": "COSTUME-001",
+                    "domain": "real-space",
+                    "role": "INST-YOUNG-MAN连续穿着的雨夜服装，湿痕和穿着层次继承S001"
+                  },
+                  {
+                    "instanceId": "INST-RIGHT-MIRROR",
+                    "assetId": "PROP-001",
+                    "domain": "real-space",
+                    "role": "右墙固定镜面及异常行为的可见反射边界"
+                  },
+                  {
+                    "instanceId": "INST-MIRROR-ANOMALY",
+                    "assetId": "CHAR-001",
+                    "domain": "reflection-only",
+                    "role": "镜内唯一人物图像；2秒后拒绝跟随现实人物回头并直视镜外，不是第二个现实人物"
+                  }
+                ],
+                "cameraSegments": [
+                  {
+                    "startOffsetSec": 0,
+                    "endOffsetSec": 2,
+                    "viewpoint": "profile",
+                    "screenDirection": "现实年轻人居中偏左并侧望右墙，镜面在画面右侧，关闭的门位于前方纵深。",
+                    "spaceId": "SPACE-CABIN",
+                    "positionAnchor": "轿厢左后侧，离左墙约0.30米、离后墙约0.35米，机位胸口高度。",
+                    "lookAt": "扶住衣领的INST-YOUNG-MAN、INST-RIGHT-MIRROR与闪烁顶灯造成的明暗变化。",
+                    "transitionFromPrevious": "initial",
+                    "boundaryId": null,
+                    "transitionPath": null
+                  },
+                  {
+                    "startOffsetSec": 2,
+                    "endOffsetSec": 6,
+                    "viewpoint": "over-shoulder",
+                    "screenDirection": "现实人物转向轿厢后部后形成肩后前景，镜内未回头的人物图像持续位于右侧清晰区。",
+                    "spaceId": "SPACE-CABIN",
+                    "positionAnchor": "由左后侧沿左墙向前侧移约0.50米后的肩后斜角机位。",
+                    "lookAt": "INST-YOUNG-MAN扭转后的肩头轮廓、其重新投向镜面的视线，以及保持原姿态的INST-MIRROR-ANOMALY。",
+                    "transitionFromPrevious": "continuous",
+                    "boundaryId": null,
+                    "transitionPath": "摄影机沿轿厢左墙单向前移约0.50米，并小幅水平转向右墙镜面；路径避开人物和门区，不后退、不环绕。"
+                  },
+                  {
+                    "startOffsetSec": 6,
+                    "endOffsetSec": 8,
+                    "viewpoint": "rear",
+                    "screenDirection": "开启的门位于画面前方；年轻人由画面中部向门外离开，镜面从右缘逐渐滑出。",
+                    "spaceId": "SPACE-CABIN",
+                    "positionAnchor": "沿轿厢左侧向门口跟移并停在门槛内约0.35米处。",
+                    "lookAt": "正在打开的双扇门、冲向SPACE-LANDING的INST-YOUNG-MAN，以及滑出画面前的INST-RIGHT-MIRROR。",
+                    "transitionFromPrevious": "continuous",
+                    "boundaryId": null,
+                    "transitionPath": "从左墙中段沿轿厢内部通道向前跟移约0.65米，在门槛内侧明确停住；摄影机不跨越BOUNDARY-ELEVATOR-THRESHOLD。"
+                  }
+                ],
+                "subjectOrientations": [
+                  {
+                    "startOffsetSec": 0,
+                    "endOffsetSec": 2,
+                    "instanceId": "INST-YOUNG-MAN",
+                    "bodyFaces": "前方关闭的双扇门。",
+                    "headFaces": "右墙镜面。",
+                    "gazeTarget": "INST-MIRROR-ANOMALY的脸。"
+                  },
+                  {
+                    "startOffsetSec": 2,
+                    "endOffsetSec": 5,
+                    "instanceId": "INST-YOUNG-MAN",
+                    "bodyFaces": "猛然扭向轿厢后部和自身身后方向。",
+                    "headFaces": "随身体转向轿厢后部。",
+                    "gazeTarget": "身后空无一人的轿厢区域。"
+                  },
+                  {
+                    "startOffsetSec": 5,
+                    "endOffsetSec": 6,
+                    "instanceId": "INST-YOUNG-MAN",
+                    "bodyFaces": "仍保持朝轿厢后部的扭转姿态。",
+                    "headFaces": "重新转向右墙镜面。",
+                    "gazeTarget": "直视INST-MIRROR-ANOMALY的双眼。"
+                  },
+                  {
+                    "startOffsetSec": 6,
+                    "endOffsetSec": 7,
+                    "instanceId": "INST-YOUNG-MAN",
+                    "bodyFaces": "由后部扭转姿态迅速转向正在开启的电梯门。",
+                    "headFaces": "前方开启门缝。",
+                    "gazeTarget": "门外可通行的落地层位置。"
+                  },
+                  {
+                    "startOffsetSec": 7,
+                    "endOffsetSec": 8,
+                    "instanceId": "INST-YOUNG-MAN",
+                    "bodyFaces": "朝SPACE-LANDING快速前进并穿过门槛。",
+                    "headFaces": "门外离开方向。",
+                    "gazeTarget": "落地层前方逃离路径。"
+                  },
+                  {
+                    "startOffsetSec": 0,
+                    "endOffsetSec": 2,
+                    "instanceId": "INST-MIRROR-ANOMALY",
+                    "bodyFaces": "保持S001结束时与现实人物对应的门向站姿。",
+                    "headFaces": "保持S001结束时朝向镜外现实人物的角度。",
+                    "gazeTarget": "镜外的INST-YOUNG-MAN。"
+                  },
+                  {
+                    "startOffsetSec": 2,
+                    "endOffsetSec": 5,
+                    "instanceId": "INST-MIRROR-ANOMALY",
+                    "bodyFaces": "拒绝复制现实人物的回头，继续保持原先门向站姿。",
+                    "headFaces": "不随现实人物转向身后，保持正面可读。",
+                    "gazeTarget": "越过镜面直视镜外摄影机一侧。"
+                  },
+                  {
+                    "startOffsetSec": 5,
+                    "endOffsetSec": 8,
+                    "instanceId": "INST-MIRROR-ANOMALY",
+                    "bodyFaces": "继续保持原先门向站姿，不复制现实人物的转身与逃离。",
+                    "headFaces": "保持面向镜外。",
+                    "gazeTarget": "先与重新看向镜面的INST-YOUNG-MAN对视，随后保持越过镜面的固定凝视直至镜面滑出画面。"
+                  }
+                ],
+                "displayRelations": [],
+                "reflectionRelations": [
+                  {
+                    "surfaceId": "INST-RIGHT-MIRROR",
+                    "normalReflectionPairs": [],
+                    "mirrorOnlyInstanceIds": [
+                      "INST-MIRROR-ANOMALY"
+                    ],
+                    "realSpaceInstanceIds": [
+                      "INST-YOUNG-MAN"
+                    ],
+                    "boundaryVisibleInFrame": true
+                  }
+                ],
+                "timedStateGates": [
+                  {
+                    "stateId": "STATE-S002-LIGHT-FLICKER",
+                    "startsAtOffsetSec": 0,
+                    "beforeState": "承接S001，冷白顶灯稳定常亮。",
+                    "afterState": "冷白顶灯开始间歇闪烁，明暗交替掠过现实人物和同一镜内人物图像。",
+                    "noEarlyOccurrence": true,
+                    "eventFacts": [
+                      {
+                        "factId": "FACT-S002-LIGHT",
+                        "subjectType": "scene",
+                        "subjectId": "SCENE-001",
+                        "property": "ceilingLightState",
+                        "beforeValue": "stable-cool-white",
+                        "afterValue": "intermittent-flicker"
+                      }
+                    ]
+                  },
+                  {
+                    "stateId": "STATE-S002-TURN-DIVERGENCE",
+                    "startsAtOffsetSec": 2,
+                    "beforeState": "现实人物与镜内人物图像均保持S001结束时的门向身体姿态和衣领手位。",
+                    "afterState": "现实人物右手离开衣领并猛然回头；镜内人物图像不回头，继续保持原姿态并直视镜外。",
+                    "noEarlyOccurrence": true,
+                    "eventFacts": [
+                      {
+                        "factId": "FACT-S002-REAL-TURN",
+                        "subjectType": "character",
+                        "subjectId": "CHAR-001",
+                        "property": "bodyHeadAndRightHandState",
+                        "beforeValue": "door-facing-head-to-mirror-right-hand-on-collar",
+                        "afterValue": "body-and-head-snapped-toward-rear-right-hand-released-from-collar"
+                      },
+                      {
+                        "factId": "FACT-S002-MIRROR-NO-TURN",
+                        "subjectType": "character",
+                        "subjectId": "INST-MIRROR-ANOMALY",
+                        "property": "reflectionResponse",
+                        "beforeValue": "matching-S001-end-pose",
+                        "afterValue": "holds-original-pose-and-gazes-through-mirror"
+                      }
+                    ]
+                  },
+                  {
+                    "stateId": "STATE-S002-EYE-CONTACT",
+                    "startsAtOffsetSec": 5,
+                    "beforeState": "现实人物仍望向身后，镜内人物图像独自直视镜外。",
+                    "afterState": "现实人物在身体仍扭转的状态下将头和视线锁回镜面，与未回头的镜内人物图像短暂对视并僵住。",
+                    "noEarlyOccurrence": true,
+                    "eventFacts": [
+                      {
+                        "factId": "FACT-S002-REAL-GAZE-RETURN",
+                        "subjectType": "character",
+                        "subjectId": "CHAR-001",
+                        "property": "headAndGazeState",
+                        "beforeValue": "looking-toward-empty-rear-cabin",
+                        "afterValue": "head-returned-to-mirror-and-body-frozen"
+                      },
+                      {
+                        "factId": "FACT-S002-MUTUAL-GAZE",
+                        "subjectType": "character",
+                        "subjectId": "INST-MIRROR-ANOMALY",
+                        "property": "gazeTarget",
+                        "beforeValue": "camera-side-beyond-mirror",
+                        "afterValue": "real-young-man-eyes-through-mirror"
+                      }
+                    ]
+                  },
+                  {
+                    "stateId": "STATE-S002-ARRIVAL-DOOR-OPEN",
+                    "startsAtOffsetSec": 6,
+                    "beforeState": "电梯仍在运行，双扇门完全关闭，门外落地层完全被门板遮挡。",
+                    "afterState": "到站提示响起，顶灯恢复稳定冷白，双扇门开始打开；门缝形成的同一刻，暖灰落地层即局部可见。",
+                    "noEarlyOccurrence": true,
+                    "eventFacts": [
+                      {
+                        "factId": "FACT-S002-ARRIVAL",
+                        "subjectType": "scene",
+                        "subjectId": "SCENE-001",
+                        "property": "elevatorArrivalPhase",
+                        "beforeValue": "running-with-doors-closed-and-light-flickering",
+                        "afterValue": "arrival-chime-light-stable-and-doors-opening"
+                      },
+                      {
+                        "factId": "FACT-S002-LANDING-REVEAL",
+                        "subjectType": "scene",
+                        "subjectId": "SCENE-001",
+                        "property": "landingVisibility",
+                        "beforeValue": "fully-occluded-by-closed-doors",
+                        "afterValue": "partially-visible-through-opening-gap"
+                      }
+                    ]
+                  },
+                  {
+                    "stateId": "STATE-S002-EXIT",
+                    "startsAtOffsetSec": 7,
+                    "beforeState": "年轻人仍在轿厢内，已转向正在开启的门；摄影机和人物均未越过门槛。",
+                    "afterState": "年轻人开始快速穿越真实门槛并于镜头结束前到达落地层；摄影机跟至门槛内侧即停止。",
+                    "noEarlyOccurrence": true,
+                    "eventFacts": [
+                      {
+                        "factId": "FACT-S002-CHARACTER-SPACE",
+                        "subjectType": "character",
+                        "subjectId": "CHAR-001",
+                        "property": "spaceAndMotionState",
+                        "beforeValue": "inside-cabin-facing-opening-door",
+                        "afterValue": "crossing-threshold-to-landing-at-running-pace"
+                      },
+                      {
+                        "factId": "FACT-S002-CAMERA-SPACE",
+                        "subjectType": "scene",
+                        "subjectId": "SCENE-001",
+                        "property": "cameraBoundaryState",
+                        "beforeValue": "inside-cabin",
+                        "afterValue": "inside-cabin-stopped-before-threshold"
+                      }
+                    ]
+                  }
+                ],
+                "feasibilityNotes": [
+                  "本镜严格使用显式拓扑S002：7—15秒，共8秒；映射为一个生成任务。",
+                  "S002的startState逐项继承S001的endState：人物位置与姿态、右手衣领接触、视线、门、灯、服装湿痕和镜内手位均未在切点重置。",
+                  "四个主要可见剧情Beat为闪灯、现实回头而镜像不回头、短暂对视、到站开门并逃离；三个摄影机阶段和五个精确事件门均在8秒预算内。",
+                  "唯一高风险层为复杂镜像关系；无屏幕、复制体群体或反常直连空间。",
+                  "门于本镜6秒开始打开时，门外落地层同步局部显露；未使用较晚识别门否认开门瞬间的部分可见性。",
+                  "年轻人于本镜7秒穿越BOUNDARY-ELEVATOR-THRESHOLD；摄影机始终留在SPACE-CABIN，因此所有cameraSegments均无需伪造空间跳转。",
+                  "声音保持单一无矛盾时间线：环境嗡鸣未在压低阶段被宣称消失，镜像不产生第二套衣料声或脚步声。"
+                ]
+              },
+              "preferredProvider": null,
+              "status": "draft"
+            }
+          ],
+          "validationNotes": [
+            {
+              "severity": "info",
+              "code": "EXPLICIT_SHOT_TOPOLOGY_PRESERVED",
+              "message": "精确保留两个显式生产镜头：S001为0—7秒，S002为7—15秒；镜头总时长精确等于15秒。",
+              "affectedIds": [
+                "S001",
+                "S002"
+              ]
+            },
+            {
+              "severity": "info",
+              "code": "SHOT_GENERATION_LIMITS_SATISFIED",
+              "message": "两个镜头均为整数秒、均不短于5秒，且分别对应一个生成任务；主要Beat、摄影机阶段、事件门和高风险层均未超限。",
+              "affectedIds": [
+                "S001",
+                "S002"
+              ]
+            },
+            {
+              "severity": "info",
+              "code": "ADJACENT_BOUNDARY_STATE_PRESERVED",
+              "message": "S002起始状态完整复制S001结束时的人物姿态、手部接触、视线、服装湿痕、门、灯和镜像状态。",
+              "affectedIds": [
+                "S001",
+                "S002"
+              ]
+            },
+            {
+              "severity": "info",
+              "code": "SPATIAL_AND_OCCLUSION_AUDIT_PASSED",
+              "message": "摄影机未发生无边界空间跳转；开门瞬间同步产生门外部分可见性，人物退出通过已声明且可穿越的真实门槛。",
+              "affectedIds": [
+                "S001",
+                "S002",
+                "SCENE-001"
+              ]
+            }
+          ]
+        },
+        "trace": {
+          "provider": "codex-cli",
+          "model": "gpt-5.6-sol",
+          "runId": "redacted-live-shooting-script",
+          "threadId": null,
+          "usage": {
+            "input_tokens": 33656,
+            "cached_input_tokens": 0,
+            "cache_write_input_tokens": 0,
+            "output_tokens": 12690,
+            "reasoning_output_tokens": 5273
+          },
+          "eventTypes": [
+            "thread.started",
+            "item.completed",
+            "turn.started",
+            "item.completed",
+            "turn.completed"
+          ],
+          "schemaVersion": "shooting-script-director-v2",
+          "route": [
+            "ai-video-producer",
+            "shooting-script-director"
+          ],
+          "completedAt": "2026-08-31T07:20:08.967Z"
+        }
+      },
+      "createdAt": "2026-08-31T07:20:08.978Z",
+      "inputArtifactRefs": [
+        {
+          "artifactId": "acfd6eea-0d47-45a0-ac1e-f5dfad37becf",
+          "contentHash": "8379aa3216cccefc406241b26c99046e2b71a1610731de0ceacbf07006805e7c"
+        },
+        {
+          "artifactId": "04ea027f-4abd-4d66-b2b1-d256e2b276f9",
+          "contentHash": "c07fe54faf3d579b50c37289fa42696d11b2fbca41b2f2c400e050841a210b62"
+        }
+      ]
+    },
+    {
+      "schemaVersion": "workflow-v3-artifact-v1",
+      "artifactId": "8441fcc2-b1bb-4993-b4bb-4e555e9a323d",
+      "projectId": "30000000-0000-4000-8000-000000000001",
+      "kind": "storyboard",
+      "version": 1,
+      "ordinal": 6,
+      "parentArtifactId": null,
+      "inputArtifactIds": [
+        "56db0a57-39ba-47a6-8f54-0d7b5ae1f21b",
+        "04ea027f-4abd-4d66-b2b1-d256e2b276f9"
+      ],
+      "contentHash": "418353ab9b5c6f0dee0826e9a5560d053e92faa0c06cf8fe910e91b3e9937029",
+      "payload": {
+        "content": {
+          "frames": [
+            {
+              "displayId": "S001",
+              "startFrame": "本镜0秒，16:9画面从轿厢左后侧胸口高度观察：前方双扇门完全敞开，门外雨夜落地层可见；CHAR-001正跨过门槛进入SPACE-CABIN，湿发、深炭灰外套右侧衣领水痕和湿鞋高光清晰。现实人物位于中左，PROP-001的完整暗银边框位于画面右侧，镜内只有一个与现实人物姿态同步的INST-MIRROR-ANOMALY；冷白顶灯稳定，人物右手垂落，门扇尚未运动。",
+              "endFrame": "本镜7秒，双扇门完全关闭，门外空间不可见；CHAR-001站在轿厢中部、身体仍朝门，右手静止扶住右侧湿衣领，头转向右墙并凝视镜内人物。PROP-001边框及镜后反射背景仍可见，镜内仅有的INST-MIRROR-ANOMALY已在6.5秒到达对应衣领手位并停止。现实人物与镜像的服装、湿痕和外貌一致，冷白顶灯保持稳定。",
+              "composition": "28mm等效中广景收至中景。现实CHAR-001始终保持在画面中左，前方双扇门及真实门槛占中央纵深，PROP-001连同至少两条相邻镜框边稳定占画面右侧约三分之一。4秒后收紧至人物右手、湿衣领、头部和镜内对应上半身均可同时辨认，但不裁掉镜面边界或现实人物与镜面之间的右墙关系。",
+              "motion": "0—2秒定于轿厢左后角，人物穿越BOUNDARY-ELEVATOR-THRESHOLD，摄影机不动且不越过门槛；2—4秒沿左墙净空单向前移约0.45米，保持人物中左、闭合门居中、镜面居右；4—7秒沿既有侧别向人物缓慢前推约0.30米后稳定。2秒前门保持完全敞开，2—4秒门扇连续合拢；4秒前现实右手保持垂落，4秒开始整理衣领；镜内手部持续保持动作前位置至4.5秒才开始迟到动作；现实手在6秒定格，镜内手继续至6.5秒后定格。",
+              "shotUid": "2fb10a10-a3f1-4a64-bfa9-a4bfb80025e3"
+            },
+            {
+              "displayId": "S002",
+              "startFrame": "本镜0秒严格匹配S001末帧：门完全关闭；CHAR-001位于轿厢中部、身体朝门，右手停在右侧湿衣领，头和目光转向PROP-001；镜内唯一INST-MIRROR-ANOMALY停在对应手位。湿发、服装水痕、门、控制面板和镜面位置均未重置。冷白顶灯在切入基准帧仍稳定，随即从该状态开始第一次明暗脉冲。",
+              "endFrame": "本镜8秒，摄影机停在轿厢内、距门槛约0.35米；双扇门大幅打开但仍处于开启末段，暖灰落地层经门口部分可见。CHAR-001已跨过真实门槛到达SPACE-LANDING并继续离开，右手不再接触衣领。顶灯恢复稳定冷白；PROP-001已从画面右缘滑出，因此不再呈现镜内人物，但在滑出前最后一刻，INST-MIRROR-ANOMALY仍保持原先门向站姿和越过镜面的凝视。",
+              "composition": "35mm等效中景至中广景。0—2秒现实CHAR-001居中偏左，关闭的门位于前方纵深，PROP-001及可辨认边框占右侧；2—6秒形成真实肩后斜角，现实人物扭转后的肩头作为中左前景，镜面中央清晰区保留未回头的INST-MIRROR-ANOMALY上半身、双眼和衣领手位；6—8秒构图转向正前方门口，人物逃离路径居中，镜面连同异常凝视从右缘逐步滑出。",
+              "motion": "0—2秒在轿厢左后侧短暂定机，顶灯由匹配的稳定状态立即进入间歇闪烁；2秒现实人物右手离开衣领并猛转向轿厢后部，镜内人物保持门向姿态。摄影机随即沿左墙向前侧移约0.50米并水平转向右墙，2—5秒维持肩后前景和清晰镜像；5秒现实人物仅将头和视线锁回镜面，身体仍保持扭转，机位稳定至6秒。6秒到站、顶灯恢复稳定且门开始打开，摄影机旋回门向并沿轿厢内部通道跟移约0.65米；7秒前人物留在轿厢内，7秒才冲过门槛。摄影机在门槛内0.35米处停止，镜面由右缘自然滑出。",
+              "shotUid": "488be859-a8c1-48fd-a5b9-c7f3b3f37701"
+            }
+          ]
+        },
+        "providerPayload": {
+          "schemaVersion": "storyboard-v2",
+          "shots": [
+            {
+              "shotId": "S001",
+              "startFrame": "本镜0秒，16:9画面从轿厢左后侧胸口高度观察：前方双扇门完全敞开，门外雨夜落地层可见；CHAR-001正跨过门槛进入SPACE-CABIN，湿发、深炭灰外套右侧衣领水痕和湿鞋高光清晰。现实人物位于中左，PROP-001的完整暗银边框位于画面右侧，镜内只有一个与现实人物姿态同步的INST-MIRROR-ANOMALY；冷白顶灯稳定，人物右手垂落，门扇尚未运动。",
+              "endFrame": "本镜7秒，双扇门完全关闭，门外空间不可见；CHAR-001站在轿厢中部、身体仍朝门，右手静止扶住右侧湿衣领，头转向右墙并凝视镜内人物。PROP-001边框及镜后反射背景仍可见，镜内仅有的INST-MIRROR-ANOMALY已在6.5秒到达对应衣领手位并停止。现实人物与镜像的服装、湿痕和外貌一致，冷白顶灯保持稳定。",
+              "composition": "28mm等效中广景收至中景。现实CHAR-001始终保持在画面中左，前方双扇门及真实门槛占中央纵深，PROP-001连同至少两条相邻镜框边稳定占画面右侧约三分之一。4秒后收紧至人物右手、湿衣领、头部和镜内对应上半身均可同时辨认，但不裁掉镜面边界或现实人物与镜面之间的右墙关系。",
+              "motionPlan": "0—2秒定于轿厢左后角，人物穿越BOUNDARY-ELEVATOR-THRESHOLD，摄影机不动且不越过门槛；2—4秒沿左墙净空单向前移约0.45米，保持人物中左、闭合门居中、镜面居右；4—7秒沿既有侧别向人物缓慢前推约0.30米后稳定。2秒前门保持完全敞开，2—4秒门扇连续合拢；4秒前现实右手保持垂落，4秒开始整理衣领；镜内手部持续保持动作前位置至4.5秒才开始迟到动作；现实手在6秒定格，镜内手继续至6.5秒后定格。",
+              "characterIds": [
+                "CHAR-001"
+              ],
+              "sceneId": "SCENE-001",
+              "requiredAssetIds": [
+                "CHAR-001",
+                "SCENE-001",
+                "PROP-001",
+                "STYLE-001",
+                "COSTUME-001"
+              ],
+              "continuityRisks": [
+                "摄影机沿狭窄左墙前移时可能与人物入厢后的站位重叠，必须保留左墙净空并维持摄影机不穿越门槛。",
+                "镜内只能出现一个INST-MIRROR-ANOMALY；若同时生成正常反射副本，会破坏既定数量与反射拓扑。",
+                "4秒、4.5秒、6秒和6.5秒的半秒级动作门容易被合并，必须让现实手与镜内手在各门之间保持可见的不同状态。",
+                "镜面边框或现实人物若在前推中被裁掉，将无法证明异常仅存在于镜内。",
+                "本镜末帧的手位、头向、视线、关闭门、稳定顶灯和湿痕必须逐项传递到S002首帧。"
+              ],
+              "physicalVerification": {
+                "cameraBlocking": "pass",
+                "displayGeometry": "not-applicable",
+                "reflectionTopology": "pass",
+                "timedStateGates": "pass",
+                "notes": [
+                  "摄影机三段路径均位于SPACE-CABIN左侧净空：先定机，再沿左墙前移0.45米，最后前推0.30米；人物可以穿越门槛，摄影机全程不穿越且不需要穿过人物、门扇或右墙镜面。",
+                  "ShotSpec声明displaySurfaces为false，画面中没有需要验证朝向或读屏机位的显示面。",
+                  "画面同时保留现实CHAR-001、PROP-001暗银边框和镜内唯一INST-MIRROR-ANOMALY，并露出镜面周围真实右墙与反射背景；normalReflectionPairs为空，因此不增加第二个正常反射人物。",
+                  "0—2秒门持续完全敞开，2秒才开始闭合；0—4秒现实右手持续垂落，4秒才抬手；镜内手在4.5秒前保持动作前位置；现实手在6秒前持续整理，镜内手在6.5秒前持续完成迟到末段。五个门前状态均有可观察保持区间。"
+                ]
+              },
+              "approved": false
+            },
+            {
+              "shotId": "S002",
+              "startFrame": "本镜0秒严格匹配S001末帧：门完全关闭；CHAR-001位于轿厢中部、身体朝门，右手停在右侧湿衣领，头和目光转向PROP-001；镜内唯一INST-MIRROR-ANOMALY停在对应手位。湿发、服装水痕、门、控制面板和镜面位置均未重置。冷白顶灯在切入基准帧仍稳定，随即从该状态开始第一次明暗脉冲。",
+              "endFrame": "本镜8秒，摄影机停在轿厢内、距门槛约0.35米；双扇门大幅打开但仍处于开启末段，暖灰落地层经门口部分可见。CHAR-001已跨过真实门槛到达SPACE-LANDING并继续离开，右手不再接触衣领。顶灯恢复稳定冷白；PROP-001已从画面右缘滑出，因此不再呈现镜内人物，但在滑出前最后一刻，INST-MIRROR-ANOMALY仍保持原先门向站姿和越过镜面的凝视。",
+              "composition": "35mm等效中景至中广景。0—2秒现实CHAR-001居中偏左，关闭的门位于前方纵深，PROP-001及可辨认边框占右侧；2—6秒形成真实肩后斜角，现实人物扭转后的肩头作为中左前景，镜面中央清晰区保留未回头的INST-MIRROR-ANOMALY上半身、双眼和衣领手位；6—8秒构图转向正前方门口，人物逃离路径居中，镜面连同异常凝视从右缘逐步滑出。",
+              "motionPlan": "0—2秒在轿厢左后侧短暂定机，顶灯由匹配的稳定状态立即进入间歇闪烁；2秒现实人物右手离开衣领并猛转向轿厢后部，镜内人物保持门向姿态。摄影机随即沿左墙向前侧移约0.50米并水平转向右墙，2—5秒维持肩后前景和清晰镜像；5秒现实人物仅将头和视线锁回镜面，身体仍保持扭转，机位稳定至6秒。6秒到站、顶灯恢复稳定且门开始打开，摄影机旋回门向并沿轿厢内部通道跟移约0.65米；7秒前人物留在轿厢内，7秒才冲过门槛。摄影机在门槛内0.35米处停止，镜面由右缘自然滑出。",
+              "characterIds": [
+                "CHAR-001"
+              ],
+              "sceneId": "SCENE-001",
+              "requiredAssetIds": [
+                "CHAR-001",
+                "SCENE-001",
+                "PROP-001",
+                "STYLE-001",
+                "COSTUME-001"
+              ],
+              "continuityRisks": [
+                "S002是切镜后的左后侧重新建立，不应把S001末段机位到S002首机位误生成成连续倒退或空间跳移。",
+                "0秒灯闪门紧贴切点；必须先以匹配S001稳定冷白状态建立基准，再显出第一次明暗变化，不能让闪烁提前污染S001。",
+                "2秒后现实人物与镜内人物姿态分离时，镜内只能保留一个INST-MIRROR-ANOMALY，且不得在轿厢后部生成对应实体。",
+                "2—6秒的肩后机位必须保留镜框和现实人物肩部，否则无法证明凝视发生在镜面边界内。",
+                "闪灯曝光变化可能遮蔽2秒姿态分离和5秒对视，关键眼神帧必须处于可读亮相位。",
+                "7秒退出时只有CHAR-001跨越门槛；摄影机必须在轿厢侧停止，且镜内人物不得复制逃离动作。"
+              ],
+              "physicalVerification": {
+                "cameraBlocking": "pass",
+                "displayGeometry": "not-applicable",
+                "reflectionTopology": "pass",
+                "timedStateGates": "pass",
+                "notes": [
+                  "0—2秒摄影机位于左后侧；2—6秒沿左墙前移0.50米至人物门向站姿的后肩一侧，可同时读取现实肩头与右墙镜面；6—8秒再沿内部通道前移0.65米并在门槛内停止。路径避开人物、右墙和门扇，摄影机不跨越BOUNDARY-ELEVATOR-THRESHOLD。",
+                  "ShotSpec声明displaySurfaces为false，没有显示屏朝向或摄影机读屏几何需要验证。",
+                  "PROP-001边框、现实CHAR-001肩部及镜内唯一INST-MIRROR-ANOMALY在2—6秒同框，镜面外的轿厢后部保持无人；normalReflectionPairs为空，不增加复制现实转身的第二反射。6—8秒镜面按摄影机转向从右缘滑出，而非让镜内实体进入现实空间。",
+                  "S001末帧提供0秒前稳定顶灯状态，S002从匹配基准帧开始闪烁；2秒前现实人与镜像均保持衣领手位和门向姿态；5秒前现实人物持续望向空的后部；6秒前门完全关闭、落地层完全不可见且灯仍处闪烁阶段；7秒前人物与摄影机均留在轿厢内。各状态只在对应0、2、5、6、7秒门点发生变化。"
+                ]
+              },
+              "approved": false
+            }
+          ],
+          "globalContinuityNotes": [
+            "总画幅固定为16:9；两镜始终使用同一CHAR-001、COSTUME-001、SCENE-001、PROP-001和STYLE-001，不改变人物外貌、湿发、衣领水痕、轿厢尺度、门、镜面或控制面板位置。",
+            "S001的7秒末帧与S002的0秒首帧逐项匹配：门关闭、现实右手扶衣领、身体朝门、头转镜面、镜内手位一致、顶灯稳定；S002的闪烁从该匹配状态开始。",
+            "S001与S002之间允许剪切并将摄影机重新建立到左后侧，但人物和环境状态不得因机位重建而重置，也不得伪装成跨镜连续摄影机路径。",
+            "镜面全程只有一个reflection-only人物图像和一个现实人物；异常仅限规定的延迟、拒绝回头及凝视，不增加正常反射副本、第二现实人物或镜后实体。",
+            "S001中人物从SPACE-LANDING进入SPACE-CABIN，S002末段沿同一真实门槛反向退出；两镜摄影机始终留在SPACE-CABIN。"
+          ]
+        },
+        "trace": {
+          "provider": "codex-cli",
+          "model": "gpt-5.6-sol",
+          "runId": "redacted-live-storyboard",
+          "threadId": null,
+          "usage": {
+            "input_tokens": 33902,
+            "cached_input_tokens": 0,
+            "cache_write_input_tokens": 0,
+            "output_tokens": 5804,
+            "reasoning_output_tokens": 3106
+          },
+          "eventTypes": [
+            "thread.started",
+            "item.completed",
+            "turn.started",
+            "item.completed",
+            "turn.completed"
+          ],
+          "schemaVersion": "storyboard-director-v2",
+          "route": [
+            "ai-video-producer",
+            "storyboard-director"
+          ],
+          "completedAt": "2026-08-31T07:22:04.961Z"
+        }
+      },
+      "createdAt": "2026-08-31T07:22:04.966Z",
+      "inputArtifactRefs": [
+        {
+          "artifactId": "56db0a57-39ba-47a6-8f54-0d7b5ae1f21b",
+          "contentHash": "5a7f92e76753ab705e692a0f2cba85aed9d2e481c3b65bc85725a3ba68ad83c9"
+        },
+        {
+          "artifactId": "04ea027f-4abd-4d66-b2b1-d256e2b276f9",
+          "contentHash": "c07fe54faf3d579b50c37289fa42696d11b2fbca41b2f2c400e050841a210b62"
+        }
+      ]
+    },
+    {
+      "schemaVersion": "workflow-v3-artifact-v1",
+      "artifactId": "3612f273-23bc-477f-bced-9b20d2764e89",
+      "projectId": "30000000-0000-4000-8000-000000000001",
+      "kind": "generation-package",
+      "version": 1,
+      "ordinal": 7,
+      "parentArtifactId": null,
+      "inputArtifactIds": [
+        "04ea027f-4abd-4d66-b2b1-d256e2b276f9",
+        "56db0a57-39ba-47a6-8f54-0d7b5ae1f21b",
+        "8441fcc2-b1bb-4993-b4bb-4e555e9a323d"
+      ],
+      "contentHash": "7ec92b7b18379b81784646204560896340b6ec53da92e40ad06de86c91033b0a",
+      "payload": {
+        "content": {
+          "schemaVersion": "generation-package-v3",
+          "sourceArtifactIds": [
+            "04ea027f-4abd-4d66-b2b1-d256e2b276f9",
+            "56db0a57-39ba-47a6-8f54-0d7b5ae1f21b",
+            "8441fcc2-b1bb-4993-b4bb-4e555e9a323d"
+          ],
+          "tasks": [
+            {
+              "shotUid": "2fb10a10-a3f1-4a64-bfa9-a4bfb80025e3",
+              "displayId": "S001",
+              "durationSec": 7,
+              "prompt": "镜头 S001，时长 7 秒。\n动作：0—2秒，摄影机从轿厢内看见年轻人带着湿气跨过敞开的门槛进入轿厢；他转身面向门，右墙镜面中只出现同一人的镜像。2秒双扇门开始在他身后合拢，门外空间随门缝收窄而逐渐被遮住，并在4秒前后完全关闭。4秒年轻人抬起右手整理湿衣领；镜像在4.5秒才开始复制同一动作。6秒现实中的右手突然停在衣领处，头和目光转向镜面；镜像继续完成迟到的最后半拍，并在6.5秒停到相同手位。年轻人保持手扶衣领、凝视镜面的警觉姿态至7秒。\n状态：电梯门完全敞开；摄影机位于轿厢左后侧；年轻人正从雨夜落地层跨入轿厢，湿发、衣领水痕和鞋面湿光清晰连续；顶灯稳定；右墙镜面完好，镜内只有同一年轻人的单一镜像。 → 电梯门完全关闭；摄影机仍在轿厢内；年轻人站在轿厢中部面向门，身体未转，右手静止扶在湿衣领处，头转向右墙、目光锁定镜面；顶灯稳定；镜中单一镜像已完成迟到的衣领动作并停在相同手位；湿发、服装层次、水痕、门、镜面和控制面板位置均未改变。\n摄影机：摄影机始终位于电梯轿厢内左后侧，以斜角同时容纳门口、现实年轻人和右墙镜面。，单镜连续完成建立、一次沿左墙短横移和结尾轻微前推；摄影机不穿越电梯门槛。\n画面：本镜0秒，16:9画面从轿厢左后侧胸口高度观察：前方双扇门完全敞开，门外雨夜落地层可见；CHAR-001正跨过门槛进入SPACE-CABIN，湿发、深炭灰外套右侧衣领水痕和湿鞋高光清晰。现实人物位于中左，PROP-001的完整暗银边框位于画面右侧，镜内只有一个与现实人物姿态同步的INST-MIRROR-ANOMALY；冷白顶灯稳定，人物右手垂落，门扇尚未运动。；28mm等效中广景收至中景。现实CHAR-001始终保持在画面中左，前方双扇门及真实门槛占中央纵深，PROP-001连同至少两条相邻镜框边稳定占画面右侧约三分之一。4秒后收紧至人物右手、湿衣领、头部和镜内对应上半身均可同时辨认，但不裁掉镜面边界或现实人物与镜面之间的右墙关系。；0—2秒定于轿厢左后角，人物穿越BOUNDARY-ELEVATOR-THRESHOLD，摄影机不动且不越过门槛；2—4秒沿左墙净空单向前移约0.45米，保持人物中左、闭合门居中、镜面居右；4—7秒沿既有侧别向人物缓慢前推约0.30米后稳定。2秒前门保持完全敞开，2—4秒门扇连续合拢；4秒前现实右手保持垂落，4秒开始整理衣领；镜内手部持续保持动作前位置至4.5秒才开始迟到动作；现实手在6秒定格，镜内手继续至6.5秒后定格。；本镜7秒，双扇门完全关闭，门外空间不可见；CHAR-001站在轿厢中部、身体仍朝门，右手静止扶住右侧湿衣领，头转向右墙并凝视镜内人物。PROP-001边框及镜后反射背景仍可见，镜内仅有的INST-MIRROR-ANOMALY已在6.5秒到达对应衣领手位并停止。现实人物与镜像的服装、湿痕和外貌一致，冷白顶灯保持稳定。\n资产事实：现实年轻人与异常镜像：唯一出场人物；镜中形象是同一人的反射状态，不是第二名人物。、原创提案：约24岁、男性化呈现，175厘米左右的清瘦窄肩体型；偏暖浅肤色、窄椭圆脸、深棕眼睛，湿黑短发贴向额头，右眉上方垂落一束不对称湿发；穿深炭灰防雨短外套、蓝灰针织上衣、黑色直筒长裤和深色皮鞋。表演从雨夜疲惫与松弛逐渐转为警觉、僵硬和仓促逃离。、以低饱和深色轮廓塑造普通、可信的独居青年；现实人与镜像完全同貌，仅通过动作延迟、头部朝向和凝视差异表现异常。、右眉上方一束贴额湿发、清瘦窄肩、略微前倾的疲惫站姿、深炭灰外套配蓝灰针织领口、受惊时右手停在湿衣领处，视线先于身体锁定镜面；雨夜旧公寓电梯轿厢：全片唯一主要空间；一座狭窄、陈旧且仍在运行的公寓电梯内部。、原创提案：约1.35米宽、1.6米深、2.25米高的封闭轿厢，前方为双扇拉丝不锈钢门，右侧墙固定大镜面，左侧是泛黄仿木饰板与磨损金属控制面板；天花板嵌一块老化冷白荧光灯，角落有氧化接缝、轻微水汽和鞋底带入的湿痕。整体为石板灰、旧银色、烟褐色与病态冷白色；门开启时仅引入昏暗暖灰色楼层光。所有构图严格使用16:9。、16:9横向空间中固定门、人物和右侧镜面的可读关系，以真实老化材质和局促尺度承载克制的镜像异常。、前方磨损双扇金属门、右墙大镜面与现实人物可同时进入16:9画面、左墙泛黄仿木板和旧式竖向控制面板、单块冷白顶灯形成轻微眼窝阴影与金属反光；右墙旧镜面：电梯内固定建筑镜面；负责呈现同一人物的正常反射与剧本规定的异常行为。、原创提案：约1.0米宽、1.8米高的竖向烟银色安全镜，薄型暗银金属压边，距地约20厘米；边缘有轻度氧化黑斑和清洁水痕，中部仍足够平整清晰，可准确辨认面部、手势与头部朝向。镜面不发光、不裂开、不形成实体通道。、以可正常工作的旧镜面承载表演型异常，让恐怖感只来自反射时间和凝视逻辑被破坏。、烟银色而非纯亮银的反射基调、四周轻度氧化的暗银窄边框、边缘水痕与中央清晰反射区形成层次、尺寸足以同时显示头部、整理衣领的手和上半身；克制电影感写实与镜像异常规则：统领角色、场景、材质、灯光和异常表现的项目级视觉规范。、严格采用16:9横画幅；低饱和石板灰、炭黑、旧银、烟褐与冷白为主，门开启时允许少量暖灰落地层光。使用可信的湿布、旧金属、氧化镜边和老化仿木纹理；中低反差曝光保留暗部细节，闪灯阶段以真实灯具明灭改变面部和镜面亮度。异常只通过连续表演与反射行为表达。、在16:9克制电影写实框架内，将超自然感限制为镜像时间差和凝视错位，保持短片清晰、可拍且不过度特效化。、16:9中现实人物、镜面和电梯门的横向空间关系、低饱和冷灰主色与落地层微暖光对比、湿润材质上的细窄高光、不依赖视觉特效的镜像表演异常",
+              "assetIds": [
+                "CHAR-001",
+                "SCENE-001",
+                "PROP-001",
+                "STYLE-001"
+              ]
+            },
+            {
+              "shotUid": "488be859-a8c1-48fd-a5b9-c7f3b3f37701",
+              "displayId": "S002",
+              "durationSec": 8,
+              "prompt": "镜头 S002，时长 8 秒。\n动作：项目7秒（本镜0秒）承接上一镜：门已关闭，年轻人仍以右手扶住湿衣领并凝视镜面；顶灯立即开始间歇闪烁。项目9秒（本镜2秒），年轻人右手离开衣领，身体和头猛然转向身后；镜内唯一人物图像拒绝跟随，保持原先门向站姿，并越过镜面直视镜外。项目12秒（本镜5秒），年轻人以仍然扭转的身体姿态将头和视线重新锁回镜面，僵住并与镜中人短暂对视。项目13秒（本镜6秒），到站提示响起，双扇门开始打开；门缝出现的同一刻，暖灰落地层即局部可见。项目14秒（本镜7秒），年轻人转向门口并冲过真实门槛；摄影机仅跟到门槛内侧，镜中人的异常凝视保持到右墙镜面在跟移构图中滑出画面的最后一刻。15秒结束时，年轻人已到门外，门仍处于开启末段。\n状态：与S001结束状态完全一致：门完全关闭；年轻人位于轿厢中部并面向门，右手静止扶在湿衣领处，头转向右墙、目光锁定镜面；镜内单一人物图像的手已停在对应衣领位置；顶灯尚稳定；湿发、服装、水痕、门、镜面和控制面板状态均未重置。 → 摄影机仍位于轿厢内并停在门槛内侧；双扇门大幅打开但仍处于开启末段，暖灰落地层部分可见；现实年轻人已跨过门槛到达门外，正继续快速离开；他的右手已离开衣领。顶灯的异常闪烁已随到站阶段停止并恢复冷白照明。镜中单一人物图像保持不随回头的正面姿态和镜外凝视，直至镜面在结尾跟移中滑出画面；角色外貌、服装与湿痕保持连续。\n摄影机：摄影机重新建立在同一轿厢左后侧，始终留在轿厢内部，以人物肩后斜角同时读取现实姿态和右墙镜像。，单镜连续完成短暂定机、一次沿左墙侧移和结尾朝门方向的轻微跟移；跟移止于门槛内侧。\n画面：本镜0秒严格匹配S001末帧：门完全关闭；CHAR-001位于轿厢中部、身体朝门，右手停在右侧湿衣领，头和目光转向PROP-001；镜内唯一INST-MIRROR-ANOMALY停在对应手位。湿发、服装水痕、门、控制面板和镜面位置均未重置。冷白顶灯在切入基准帧仍稳定，随即从该状态开始第一次明暗脉冲。；35mm等效中景至中广景。0—2秒现实CHAR-001居中偏左，关闭的门位于前方纵深，PROP-001及可辨认边框占右侧；2—6秒形成真实肩后斜角，现实人物扭转后的肩头作为中左前景，镜面中央清晰区保留未回头的INST-MIRROR-ANOMALY上半身、双眼和衣领手位；6—8秒构图转向正前方门口，人物逃离路径居中，镜面连同异常凝视从右缘逐步滑出。；0—2秒在轿厢左后侧短暂定机，顶灯由匹配的稳定状态立即进入间歇闪烁；2秒现实人物右手离开衣领并猛转向轿厢后部，镜内人物保持门向姿态。摄影机随即沿左墙向前侧移约0.50米并水平转向右墙，2—5秒维持肩后前景和清晰镜像；5秒现实人物仅将头和视线锁回镜面，身体仍保持扭转，机位稳定至6秒。6秒到站、顶灯恢复稳定且门开始打开，摄影机旋回门向并沿轿厢内部通道跟移约0.65米；7秒前人物留在轿厢内，7秒才冲过门槛。摄影机在门槛内0.35米处停止，镜面由右缘自然滑出。；本镜8秒，摄影机停在轿厢内、距门槛约0.35米；双扇门大幅打开但仍处于开启末段，暖灰落地层经门口部分可见。CHAR-001已跨过真实门槛到达SPACE-LANDING并继续离开，右手不再接触衣领。顶灯恢复稳定冷白；PROP-001已从画面右缘滑出，因此不再呈现镜内人物，但在滑出前最后一刻，INST-MIRROR-ANOMALY仍保持原先门向站姿和越过镜面的凝视。\n资产事实：现实年轻人与异常镜像：唯一出场人物；镜中形象是同一人的反射状态，不是第二名人物。、原创提案：约24岁、男性化呈现，175厘米左右的清瘦窄肩体型；偏暖浅肤色、窄椭圆脸、深棕眼睛，湿黑短发贴向额头，右眉上方垂落一束不对称湿发；穿深炭灰防雨短外套、蓝灰针织上衣、黑色直筒长裤和深色皮鞋。表演从雨夜疲惫与松弛逐渐转为警觉、僵硬和仓促逃离。、以低饱和深色轮廓塑造普通、可信的独居青年；现实人与镜像完全同貌，仅通过动作延迟、头部朝向和凝视差异表现异常。、右眉上方一束贴额湿发、清瘦窄肩、略微前倾的疲惫站姿、深炭灰外套配蓝灰针织领口、受惊时右手停在湿衣领处，视线先于身体锁定镜面；雨夜旧公寓电梯轿厢：全片唯一主要空间；一座狭窄、陈旧且仍在运行的公寓电梯内部。、原创提案：约1.35米宽、1.6米深、2.25米高的封闭轿厢，前方为双扇拉丝不锈钢门，右侧墙固定大镜面，左侧是泛黄仿木饰板与磨损金属控制面板；天花板嵌一块老化冷白荧光灯，角落有氧化接缝、轻微水汽和鞋底带入的湿痕。整体为石板灰、旧银色、烟褐色与病态冷白色；门开启时仅引入昏暗暖灰色楼层光。所有构图严格使用16:9。、16:9横向空间中固定门、人物和右侧镜面的可读关系，以真实老化材质和局促尺度承载克制的镜像异常。、前方磨损双扇金属门、右墙大镜面与现实人物可同时进入16:9画面、左墙泛黄仿木板和旧式竖向控制面板、单块冷白顶灯形成轻微眼窝阴影与金属反光；右墙旧镜面：电梯内固定建筑镜面；负责呈现同一人物的正常反射与剧本规定的异常行为。、原创提案：约1.0米宽、1.8米高的竖向烟银色安全镜，薄型暗银金属压边，距地约20厘米；边缘有轻度氧化黑斑和清洁水痕，中部仍足够平整清晰，可准确辨认面部、手势与头部朝向。镜面不发光、不裂开、不形成实体通道。、以可正常工作的旧镜面承载表演型异常，让恐怖感只来自反射时间和凝视逻辑被破坏。、烟银色而非纯亮银的反射基调、四周轻度氧化的暗银窄边框、边缘水痕与中央清晰反射区形成层次、尺寸足以同时显示头部、整理衣领的手和上半身；克制电影感写实与镜像异常规则：统领角色、场景、材质、灯光和异常表现的项目级视觉规范。、严格采用16:9横画幅；低饱和石板灰、炭黑、旧银、烟褐与冷白为主，门开启时允许少量暖灰落地层光。使用可信的湿布、旧金属、氧化镜边和老化仿木纹理；中低反差曝光保留暗部细节，闪灯阶段以真实灯具明灭改变面部和镜面亮度。异常只通过连续表演与反射行为表达。、在16:9克制电影写实框架内，将超自然感限制为镜像时间差和凝视错位，保持短片清晰、可拍且不过度特效化。、16:9中现实人物、镜面和电梯门的横向空间关系、低饱和冷灰主色与落地层微暖光对比、湿润材质上的细窄高光、不依赖视觉特效的镜像表演异常",
+              "assetIds": [
+                "CHAR-001",
+                "SCENE-001",
+                "PROP-001",
+                "STYLE-001"
+              ]
+            }
+          ]
+        },
+        "trace": {
+          "provider": "workflow-v3-deterministic-compiler",
+          "runId": "package-5a7f92e76753ab70",
+          "completedAt": "2026-08-31T07:22:04.973Z"
+        }
+      },
+      "createdAt": "2026-08-31T07:22:04.975Z",
+      "inputArtifactRefs": [
+        {
+          "artifactId": "04ea027f-4abd-4d66-b2b1-d256e2b276f9",
+          "contentHash": "c07fe54faf3d579b50c37289fa42696d11b2fbca41b2f2c400e050841a210b62"
+        },
+        {
+          "artifactId": "56db0a57-39ba-47a6-8f54-0d7b5ae1f21b",
+          "contentHash": "5a7f92e76753ab705e692a0f2cba85aed9d2e481c3b65bc85725a3ba68ad83c9"
+        },
+        {
+          "artifactId": "8441fcc2-b1bb-4993-b4bb-4e555e9a323d",
+          "contentHash": "418353ab9b5c6f0dee0826e9a5560d053e92faa0c06cf8fe910e91b3e9937029"
+        }
+      ]
+    }
+  ],
+  "verifications": [
+    {
+      "schemaVersion": "workflow-v3-verification-v1",
+      "receiptId": "81bd2372-d0f3-4378-a09d-2bb7a087115a",
+      "artifactId": "a961555f-1e59-4684-b7a2-96a9e26e24a1",
+      "artifactHash": "54411e93e44555258a2f630948a9c7b438559b572bccc466f6240b2a4475c918",
+      "verifierId": "workflow-v3-deterministic-verifier",
+      "verifierVersion": "1",
+      "status": "passed",
+      "checks": [
+        {
+          "code": "V3_INPUTS_EXIST",
+          "passed": true,
+          "evidence": []
+        },
+        {
+          "code": "V3_SOURCE_NON_EMPTY",
+          "passed": true,
+          "evidence": [
+            "length:160"
+          ]
+        }
+      ],
+      "createdAt": "2026-08-31T07:13:40.589Z"
+    },
+    {
+      "schemaVersion": "workflow-v3-verification-v1",
+      "receiptId": "97f34e70-adf2-4189-8b0f-7d61238c1ee0",
+      "artifactId": "497b4460-2c52-4ac1-b458-c56bada3a5a5",
+      "artifactHash": "bb4797f7dcd26b9a1b18b2658ed840a2e55d8fcf2efa65d08c20a4a804619b66",
+      "verifierId": "workflow-v3-deterministic-verifier",
+      "verifierVersion": "1",
+      "status": "passed",
+      "checks": [
+        {
+          "code": "V3_INPUTS_EXIST",
+          "passed": true,
+          "evidence": [
+            "a961555f-1e59-4684-b7a2-96a9e26e24a1"
+          ]
+        }
+      ],
+      "createdAt": "2026-08-31T07:14:01.928Z"
+    },
+    {
+      "schemaVersion": "workflow-v3-verification-v1",
+      "receiptId": "cf5cca07-7bd9-4cf7-850a-014dcbf265c6",
+      "artifactId": "acfd6eea-0d47-45a0-ac1e-f5dfad37becf",
+      "artifactHash": "8379aa3216cccefc406241b26c99046e2b71a1610731de0ceacbf07006805e7c",
+      "verifierId": "workflow-v3-deterministic-verifier",
+      "verifierVersion": "1",
+      "status": "passed",
+      "checks": [
+        {
+          "code": "V3_INPUTS_EXIST",
+          "passed": true,
+          "evidence": [
+            "a961555f-1e59-4684-b7a2-96a9e26e24a1",
+            "497b4460-2c52-4ac1-b458-c56bada3a5a5"
+          ]
+        }
+      ],
+      "createdAt": "2026-08-31T07:14:29.285Z"
+    },
+    {
+      "schemaVersion": "workflow-v3-verification-v1",
+      "receiptId": "267e3b80-bd23-4c17-87a2-ba2fb90b1b4b",
+      "artifactId": "04ea027f-4abd-4d66-b2b1-d256e2b276f9",
+      "artifactHash": "c07fe54faf3d579b50c37289fa42696d11b2fbca41b2f2c400e050841a210b62",
+      "verifierId": "workflow-v3-deterministic-verifier",
+      "verifierVersion": "1",
+      "status": "passed",
+      "checks": [
+        {
+          "code": "V3_INPUTS_EXIST",
+          "passed": true,
+          "evidence": [
+            "acfd6eea-0d47-45a0-ac1e-f5dfad37becf"
+          ]
+        }
+      ],
+      "createdAt": "2026-08-31T07:16:26.091Z"
+    },
+    {
+      "schemaVersion": "workflow-v3-verification-v1",
+      "receiptId": "be73a346-a4c3-4cde-ac6f-3cee7915f201",
+      "artifactId": "56db0a57-39ba-47a6-8f54-0d7b5ae1f21b",
+      "artifactHash": "5a7f92e76753ab705e692a0f2cba85aed9d2e481c3b65bc85725a3ba68ad83c9",
+      "verifierId": "workflow-v3-deterministic-verifier",
+      "verifierVersion": "1",
+      "status": "passed",
+      "checks": [
+        {
+          "code": "V3_INPUTS_EXIST",
+          "passed": true,
+          "evidence": [
+            "acfd6eea-0d47-45a0-ac1e-f5dfad37becf",
+            "04ea027f-4abd-4d66-b2b1-d256e2b276f9"
+          ]
+        },
+        {
+          "code": "V3_SHOT_UID_UNIQUE",
+          "passed": true,
+          "evidence": [
+            "2fb10a10-a3f1-4a64-bfa9-a4bfb80025e3",
+            "488be859-a8c1-48fd-a5b9-c7f3b3f37701"
+          ]
+        },
+        {
+          "code": "V3_DISPLAY_ID_UNIQUE",
+          "passed": true,
+          "evidence": [
+            "S001",
+            "S002"
+          ]
+        }
+      ],
+      "createdAt": "2026-08-31T07:20:08.98Z"
+    },
+    {
+      "schemaVersion": "workflow-v3-verification-v1",
+      "receiptId": "ab18ee3e-d2c4-4cb0-89f3-75e1153a143e",
+      "artifactId": "8441fcc2-b1bb-4993-b4bb-4e555e9a323d",
+      "artifactHash": "418353ab9b5c6f0dee0826e9a5560d053e92faa0c06cf8fe910e91b3e9937029",
+      "verifierId": "workflow-v3-deterministic-verifier",
+      "verifierVersion": "1",
+      "status": "passed",
+      "checks": [
+        {
+          "code": "V3_INPUTS_EXIST",
+          "passed": true,
+          "evidence": [
+            "56db0a57-39ba-47a6-8f54-0d7b5ae1f21b",
+            "04ea027f-4abd-4d66-b2b1-d256e2b276f9"
+          ]
+        },
+        {
+          "code": "V3_STORYBOARD_ONE_TO_ONE_SHOT_COVERAGE",
+          "passed": true,
+          "evidence": [
+            "expected:2fb10a10-a3f1-4a64-bfa9-a4bfb80025e3,488be859-a8c1-48fd-a5b9-c7f3b3f37701",
+            "actual:2fb10a10-a3f1-4a64-bfa9-a4bfb80025e3,488be859-a8c1-48fd-a5b9-c7f3b3f37701"
+          ]
+        }
+      ],
+      "createdAt": "2026-08-31T07:22:04.968Z"
+    },
+    {
+      "schemaVersion": "workflow-v3-verification-v1",
+      "receiptId": "3c75617f-f362-40a8-99ad-d43e6f047f14",
+      "artifactId": "3612f273-23bc-477f-bced-9b20d2764e89",
+      "artifactHash": "7ec92b7b18379b81784646204560896340b6ec53da92e40ad06de86c91033b0a",
+      "verifierId": "workflow-v3-deterministic-verifier",
+      "verifierVersion": "1",
+      "status": "passed",
+      "checks": [
+        {
+          "code": "V3_INPUTS_EXIST",
+          "passed": true,
+          "evidence": [
+            "04ea027f-4abd-4d66-b2b1-d256e2b276f9",
+            "56db0a57-39ba-47a6-8f54-0d7b5ae1f21b",
+            "8441fcc2-b1bb-4993-b4bb-4e555e9a323d"
+          ]
+        },
+        {
+          "code": "V3_PACKAGE_ONE_TASK_PER_SHOT",
+          "passed": true,
+          "evidence": [
+            "expected:2fb10a10-a3f1-4a64-bfa9-a4bfb80025e3,488be859-a8c1-48fd-a5b9-c7f3b3f37701",
+            "actual:2fb10a10-a3f1-4a64-bfa9-a4bfb80025e3,488be859-a8c1-48fd-a5b9-c7f3b3f37701"
+          ]
+        },
+        {
+          "code": "V3_PACKAGE_PROVENANCE_COMPLETE",
+          "passed": true,
+          "evidence": [
+            "04ea027f-4abd-4d66-b2b1-d256e2b276f9",
+            "56db0a57-39ba-47a6-8f54-0d7b5ae1f21b",
+            "8441fcc2-b1bb-4993-b4bb-4e555e9a323d"
+          ]
+        }
+      ],
+      "createdAt": "2026-08-31T07:22:04.977Z"
+    }
+  ]
+}

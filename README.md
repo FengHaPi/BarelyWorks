@@ -4,7 +4,7 @@
 
 # BarelyWorks · AI Video Studio
 
-> A local-first, Agent-first AI video production console for Windows, built around versioned artifacts, cumulative verification, human approval gates, and auditable handoffs.
+> An open-source, local-first AI video production workflow that combines probabilistic model generation with deterministic lineage, verification, human adoption, and fail-closed production gates.
 
 ![Project status](https://img.shields.io/badge/status-alpha-7c3aed)
 ![Version](https://img.shields.io/badge/version-v0.2.0--alpha-6366f1)
@@ -22,6 +22,58 @@ Text-stage artifacts are produced through real Codex CLI runs guided by versione
 
 > [!IMPORTANT]
 > **v0.2.0 is an Alpha release.** It introduces independent artifact Heads, provenance links, a real project Agent, recoverable long-running Operations, an issue center, and cumulative verification that rechecks all applicable upstream evidence before later production stages.
+
+## What is AI Video Studio?
+
+AI Video Studio is an open-source experiment in making model-assisted video production auditable. Models may propose content, but they do not own version selection, approval, or production readiness. Workflow V3 records exact immutable inputs, verifies candidates deterministically where possible, requires explicit human approval and adoption, and refuses to create a generation package when evidence is missing or inconsistent.
+
+The V3 core is isolated from the legacy workflow database and state machine. It does not claim to generate a finished film or operate a paid video provider.
+
+## Workflow V3
+
+```text
+Source
+  → Outline
+  → Screenplay
+  → Asset Bible
+  → Shooting Script
+  → Storyboard
+  → Verification
+  → Human Approval
+  → Adoption
+  → Production Gate
+  → Generation Package
+```
+
+**Success moves forward. Failure stops in place.** A generated Candidate does not become current merely because generation or Verification succeeded. Human Approval and explicit Adoption are separate immutable records, and downstream artifacts bind exact upstream Artifact IDs and hashes.
+
+### Current V3 status
+
+- ✅ Real-model Source → Storyboard Live E2E
+- ✅ Stable `shotUid` identity; `S001` remains a display label
+- ✅ Immutable Artifact and version history
+- ✅ Explicit input lineage by Artifact ID and content hash
+- ✅ Deterministic Verification receipts
+- ✅ Human Approval receipts
+- ✅ Immutable Adoption history plus current projections
+- ✅ Fail-closed Production Gate
+- ✅ Deterministic Generation Package
+- ✅ Failure-path tests with no automatic repair/revision loop
+- 🚧 H3 integration
+- 🚧 Video Provider execution
+- 🚧 Shot QA
+- 🚧 Editing and delivery
+- 🚧 Production UI integration
+
+Run the isolated non-Live suite:
+
+```powershell
+npm ci
+npm run typecheck
+npm run test:workflow-v3
+```
+
+The real-model test is deliberately opt-in and is not run by the normal suite. See [Workflow V3 architecture](docs/workflow-v3-architecture.md), [redacted Live E2E evidence](docs/workflow-v3-live-e2e.md), and the [release manifest](docs/workflow-v3-release-manifest.md).
 
 ## Why BarelyWorks
 
@@ -79,7 +131,9 @@ See the [release checklist](docs/release-process.md) for the version, tag, chang
 
 Every critical stage stops at a human review gate. The workflow is not a one-way wizard: any artifact can be inspected and revised independently, and later stages recheck all applicable upstream artifacts and evidence.
 
-## Current status
+## Existing v0.2.0 application status
+
+The table below describes the pre-existing v0.2.0 application. It is separate from the isolated Workflow V3 status above.
 
 | Area | Status | Current result |
 |---|---|---|
